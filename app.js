@@ -79,3 +79,20 @@ document.querySelector('#lang')?.addEventListener('click',()=>{
  const g=document.querySelector('#generate');if(!g.disabled)g.textContent=t.generate;
  document.querySelector('#resultTitle').textContent=t.result;
 });
+async function startRazorpayPayment(){
+ const btn=document.querySelector("#payBtn"); if(btn)btn.disabled=true;
+ try{
+  const r=await fetch("/api/create-order",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+  const o=await r.json(); if(!r.ok)throw new Error(o.error||"Payment unavailable");
+  if(!window.Razorpay)throw new Error("Checkout unavailable");
+  new Razorpay({key:o.key,amount:o.amount,currency:o.currency,name:"Naa Bhavishyathu AI",description:"Extra AI Portrait Access",order_id:o.orderId,
+   handler:async function(p){
+    const vr=await fetch("/api/verify-payment",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});
+    const v=await vr.json();
+    if(vr.ok&&v.verified){alert("Payment successful ✅");document.querySelector("#paymentBox").hidden=true;}
+    else alert("Payment verification failed. Please contact support.");
+   },theme:{color:"#6d28d9"}}).open();
+ }catch(e){alert(e.message||"Payment service unavailable.");}
+ finally{if(btn)btn.disabled=false;}
+}
+document.querySelector("#payBtn")?.addEventListener("click",startRazorpayPayment);
