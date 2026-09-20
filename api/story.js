@@ -16,7 +16,7 @@ export default async function handler(req, res) {
         profession,
         interests: profession + ", AI, Technology",
         skills: "Learning and future career skills",
-        goal: "Become a successful " + profession,
+        goal: "Create ONLY a short inspirational Telugu career story for " + name + " as a future " + profession + ". Maximum 5 short sentences, about 80-120 words. No headings, no numbered lists, no Markdown, no **, no ###, no invented age/education/qualifications, and no exam or career claims unless supplied by the user.",
         country: country || "India",
         state: state || ""
       })
@@ -27,7 +27,9 @@ export default async function handler(req, res) {
     try { data = JSON.parse(text); } catch { data = { output: text }; }
     if (!r.ok) return res.status(r.status).json({ error: data?.message || data?.error || "AI story service failed." });
 
-    const output = data?.output || data?.text || data?.message || data?.response || "";
+    let output = data?.output || data?.text || data?.message || data?.response || "";
+    output = String(output).replace(/#{1,6}\\s*/g, "").replace(/\\*\\*/g, "").replace(/__+/g, "").replace(/`+/g, "").replace(/\\n{3,}/g, "\\n\\n").trim();
+    if (output.length > 900) output = output.slice(0, 900).replace(/\\s+\\S*$/, "") + "…";
     if (!output) return res.status(502).json({ error: "AI story service returned no text." });
     return res.status(200).json({ story: output });
   } catch (e) {
