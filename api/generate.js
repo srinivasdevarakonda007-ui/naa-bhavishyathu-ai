@@ -1,6 +1,7 @@
 export const config = { api: { bodyParser: false } };
 
 const prompts = {
+  "IAS Officer":"Transform the person into a dignified fictional Indian civil-service leadership career portrait in elegant formal attire, premium government-office-inspired setting, no official emblem, no ID card, no credential claim. Preserve identity and natural facial features.",
   "Police Officer":"Transform the person into a dignified fictional professional police-officer career portrait. Generic clean uniform, no real department insignia, no official ID, no document. Preserve the person's identity, facial structure, skin tone, hairstyle and age as closely as possible.",
   "Lawyer":"Transform the person into a premium professional lawyer portrait in formal black advocate attire, elegant legal-office background. Preserve identity and natural facial features.",
   "Sports Teacher":"Transform the person into a confident professional physical education teacher portrait on a modern school sports ground, premium sportswear, whistle, tasteful athletic atmosphere. Preserve identity.",
