@@ -16,8 +16,22 @@ const prompts = {
   "Engineer":"Transform the person into a professional engineer portrait in a modern technology workspace. Preserve identity."
 };
 
+const rateBuckets = globalThis.__nbaiRateBuckets || (globalThis.__nbaiRateBuckets = new Map());
+const RATE_WINDOW_MS = 60 * 60 * 1000;
+const RATE_MAX = 5;
+function allowRequest(req){
+  const ip=String(req.headers["x-forwarded-for"]||req.headers["x-real-ip"]||"unknown").split(",")[0].trim();
+  const now=Date.now();
+  const bucket=rateBuckets.get(ip);
+  if(!bucket || now-bucket.start>=RATE_WINDOW_MS){rateBuckets.set(ip,{start:now,count:1});return {ok:true};}
+  if(bucket.count>=RATE_MAX){return {ok:false,retryAfter:Math.max(1,Math.ceil((RATE_WINDOW_MS-(now-bucket.start))/60000))};}
+  bucket.count++; return {ok:true};
+}
+
 export default async function handler(req,res){
   if(req.method!=="POST") return res.status(405).json({error:"POST only"});
+  const limit=allowRequest(req);
+  if(!limit.ok) return res.status(429).json({error:"Free generation limit reached. Please try again later.",code:"RATE_LIMIT",retryAfterMinutes:limit.retryAfter});
   if(!process.env.OPENAI_API_KEY) return res.status(500).json({error:"Server API key is not configured."});
   try{
     const chunks=[]; for await(const chunk of req) chunks.push(chunk);
