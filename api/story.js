@@ -14,9 +14,9 @@ export default async function handler(req, res) {
         age: age || "",
         education: education || "",
         profession,
-        interests: profession + ", AI, Technology",
-        skills: "Learning and future career skills",
-        goal: "Create ONLY a short inspirational Telugu career story for " + name + " as a future " + profession + ". Maximum 5 short sentences, about 80-120 words. No headings, no numbered lists, no Markdown, no **, no ###, no invented age/education/qualifications, and no exam or career claims unless supplied by the user.",
+        interests: profession + " career, discipline, learning",
+        skills: "Not provided by user",
+        goal: "Write ONLY 3 very short inspirational sentences in natural Telugu for " + name + " dreaming of becoming a " + profession + ". Mention the selected profession. Encourage practice, discipline and learning. Do not ask questions. Do not mention missing information. Do not invent age, education, skills, achievements or qualifications. Do not give alternate careers. No English except the profession name if necessary. No headings, lists, Markdown, ** or ###. Keep the entire response under 55 Telugu words.",
         country: country || "India",
         state: state || ""
       })
