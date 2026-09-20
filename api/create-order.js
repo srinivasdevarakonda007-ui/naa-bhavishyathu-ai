@@ -1,7 +1,7 @@
 export default async function handler(req,res){
   if(req.method!=="POST") return res.status(405).json({error:"POST only"});
   const key=process.env.RAZORPAY_KEY_ID, secret=process.env.RAZORPAY_KEY_SECRET;
-  const amount=Number(process.env.RAZORPAY_PRICE_PAISE||0);
+  const amount=2000; // ₹20 per extra AI portrait
   if(!key||!secret||!Number.isInteger(amount)||amount<100) return res.status(503).json({error:"Payments are not configured yet."});
   try{
     const auth=Buffer.from(key+":"+secret).toString("base64");
