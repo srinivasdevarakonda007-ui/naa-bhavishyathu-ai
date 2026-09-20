@@ -56,3 +56,20 @@ async function posterBlob(){
 document.querySelector("#download").onclick=async()=>{try{const b=await posterBlob(),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=(document.querySelector("#personName").value.trim()||"portrait")+"-"+(selected||"career")+".jpg";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}catch(e){alert(e.message)}};
 document.querySelector("#print").onclick=async()=>{try{const b=await posterBlob(),u=URL.createObjectURL(b),w=window.open("","_blank");w.document.write('<html><head><title>A4 Print</title><style>@page{size:A4 portrait;margin:0}body{margin:0}img{width:210mm;height:297mm;object-fit:contain;display:block}</style></head><body><img src="'+u+'" onload="window.print()"></body></html>');w.document.close()}catch(e){alert(e.message)}};
 document.querySelector("#share").onclick=async()=>{try{const b=await posterBlob(),file=new File([b],"naa-bhavishyathu-ai.jpg",{type:"image/jpeg"});if(navigator.share&&navigator.canShare?.({files:[file]})){await navigator.share({title:document.querySelector("#role").textContent,text:"Naa Bhavishyathu AI — నా Dream Career Portrait",files:[file]})}else{window.open("https://wa.me/?text="+encodeURIComponent(document.querySelector("#role").textContent+" — Naa Bhavishyathu AI"),"_blank")}}catch(e){if(e.name!=="AbortError")alert(e.message)}};
+
+
+// Telugu / English UI toggle
+let uiLang="te";
+const langBtn=document.querySelector("#lang");
+const labels={
+ te:{hero:"మీ ఫోటో. మీ కల. మీ భవిష్యత్తు.",generate:"AI Portrait తయారు చేయండి",dream:"✨ మీ Dream Portrait"},
+ en:{hero:"Your Photo. Your Dream. Your Future.",generate:"Create AI Portrait",dream:"✨ Your Dream Portrait"}
+};
+langBtn?.addEventListener("click",()=>{
+ uiLang=uiLang==="te"?"en":"te";
+ langBtn.textContent=uiLang==="te"?"తెలుగు / EN":"EN / తెలుగు";
+ const h1=document.querySelector(".hero h1");
+ if(h1)h1.textContent=labels[uiLang].hero;
+ const g=document.querySelector("#generate");if(g&&!g.disabled)g.textContent=labels[uiLang].generate;
+ const rh=document.querySelector(".result h2");if(rh)rh.textContent=labels[uiLang].dream;
+});
