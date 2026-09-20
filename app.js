@@ -1,4 +1,4 @@
-const jobs=[["👮","Police Officer"],["🇮🇳","IAS Officer"],["⚖️","Lawyer"],["🏅","Sports Teacher"],["🏃","Athlete"],["🩺","Doctor"],["👩‍🏫","Teacher"],["🔬","Scientist"],["✈️","Pilot"],["🪖","Army Officer"],["👨‍🍳","Chef"],["💼","Entrepreneur"],["💻","Engineer"]];let selected="";const grid=document.querySelector("#jobs");jobs.forEach(([icon,name])=>{const b=document.createElement("button");b.className="job";b.innerHTML="<span>"+icon+"</span><b>"+name+"</b>";b.onclick=()=>{document.querySelectorAll(".job").forEach(x=>x.classList.remove("active"));b.classList.add("active");selected=name;document.querySelector("#role").textContent=(document.querySelector("#personName")?.value.trim()||"నా కల")+" — "+name};grid.appendChild(b)});document.querySelector("#photo").onchange=e=>{const f=e.target.files[0];if(!f)return;const url=URL.createObjectURL(f);document.querySelector("#preview").innerHTML='<img src="'+url+'" alt="preview">';document.querySelector("#poster").querySelector(".placeholder")?.remove();let img=document.querySelector("#poster img");if(!img){img=document.createElement("img");document.querySelector("#poster").prepend(img)}img.src=url};
+const jobs=[["👮","Police Officer"],["🏛️","IAS Officer"],["⚖️","Lawyer"],["🏅","Sports Teacher"],["🏃","Athlete"],["🩺","Doctor"],["👩‍🏫","Teacher"],["🔬","Scientist"],["✈️","Pilot"],["🪖","Army Officer"],["👨‍🍳","Chef"],["💼","Entrepreneur"],["💻","Engineer"]];let selected="";const grid=document.querySelector("#jobs");jobs.forEach(([icon,name])=>{const b=document.createElement("button");b.className="job";b.innerHTML="<span>"+icon+"</span><b>"+name+"</b>";b.onclick=()=>{document.querySelectorAll(".job").forEach(x=>x.classList.remove("active"));b.classList.add("active");selected=name;document.querySelector("#role").textContent=(document.querySelector("#personName")?.value.trim()||"నా కల")+" — "+name};grid.appendChild(b)});document.querySelector("#photo").onchange=e=>{const f=e.target.files[0];if(!f)return;const url=URL.createObjectURL(f);document.querySelector("#preview").innerHTML='<img src="'+url+'" alt="preview">';document.querySelector("#poster").querySelector(".placeholder")?.remove();let img=document.querySelector("#poster img");if(!img){img=document.createElement("img");document.querySelector("#poster").prepend(img)}img.src=url};
 document.querySelector("#generate").onclick=async()=>{
  const file=document.querySelector("#photo").files[0];
  if(!file)return alert("ముందుగా మీ ఫోటో upload చేయండి.");
@@ -58,18 +58,20 @@ document.querySelector("#print").onclick=async()=>{try{const b=await posterBlob(
 document.querySelector("#share").onclick=async()=>{try{const b=await posterBlob(),file=new File([b],"naa-bhavishyathu-ai.jpg",{type:"image/jpeg"});if(navigator.share&&navigator.canShare?.({files:[file]})){await navigator.share({title:document.querySelector("#role").textContent,text:"Naa Bhavishyathu AI — నా Dream Career Portrait",files:[file]})}else{window.open("https://wa.me/?text="+encodeURIComponent(document.querySelector("#role").textContent+" — Naa Bhavishyathu AI"),"_blank")}}catch(e){if(e.name!=="AbortError")alert(e.message)}};
 
 
-// Telugu / English UI toggle
-let uiLang="te";
-const langBtn=document.querySelector("#lang");
-const labels={
- te:{hero:"మీ ఫోటో. మీ కల. మీ భవిష్యత్తు.",generate:"AI Portrait తయారు చేయండి",dream:"✨ మీ Dream Portrait"},
- en:{hero:"Your Photo. Your Dream. Your Future.",generate:"Create AI Portrait",dream:"✨ Your Dream Portrait"}
+
+const uiText={
+ te:{heroTitle:'మీ ఫోటో. మీ కల.<br><em>మీ భవిష్యత్తు.</em>',heroText:'మీ ఫోటోను మీ Dream Profession రూపంలో AI portraitగా మార్చండి. మీ పేరుతో చిన్న తెలుగు inspirational message కూడా పొందండి.',upload:'📷 ఫోటో ఎంచుకోండి',details:'మీ వివరాలు',name:'మీ పేరు',country:'దేశం',state:'రాష్ట్రం',profession:'మీ Dream Profession ఎంచుకోండి',create:'మీ Future Portrait తయారు చేయండి',createText:'Photo + Name + Profession సిద్ధంగా ఉంటే Generate నొక్కండి.',generate:'✨ AI Portrait తయారు చేయండి',result:'మీ Dream Portrait'},
+ en:{heroTitle:'Your Photo. Your Dream.<br><em>Your Future.</em>',heroText:'Turn your photo into a premium AI dream-career portrait and get a short inspirational message with your name.',upload:'📷 Choose Photo',details:'Your Details',name:'Your Name',country:'Country',state:'State',profession:'Choose Your Dream Profession',create:'Create Your Future Portrait',createText:'When your photo, name and profession are ready, press Generate.',generate:'✨ Create AI Portrait',result:'Your Dream Portrait'}
 };
-langBtn?.addEventListener("click",()=>{
- uiLang=uiLang==="te"?"en":"te";
- langBtn.textContent=uiLang==="te"?"తెలుగు / EN":"EN / తెలుగు";
- const h1=document.querySelector(".hero h1");
- if(h1)h1.textContent=labels[uiLang].hero;
- const g=document.querySelector("#generate");if(g&&!g.disabled)g.textContent=labels[uiLang].generate;
- const rh=document.querySelector(".result h2");if(rh)rh.textContent=labels[uiLang].dream;
+let uiLang='te';
+document.querySelector('#lang')?.addEventListener('click',()=>{
+ uiLang=uiLang==='te'?'en':'te';const t=uiText[uiLang];
+ document.querySelector('#lang').textContent=uiLang==='te'?'తెలుగు / EN':'EN / తెలుగు';
+ document.querySelector('#heroTitle').innerHTML=t.heroTitle;document.querySelector('#heroText').textContent=t.heroText;
+ document.querySelector('#uploadBtn').textContent=t.upload;document.querySelector('#detailsTitle').textContent=t.details;
+ document.querySelector('#nameLabel').textContent=t.name;document.querySelector('#countryLabel').textContent=t.country;
+ document.querySelector('#stateLabel').textContent=t.state;document.querySelector('#professionTitle').textContent=t.profession;
+ document.querySelector('#createTitle').textContent=t.create;document.querySelector('#createText').textContent=t.createText;
+ const g=document.querySelector('#generate');if(!g.disabled)g.textContent=t.generate;
+ document.querySelector('#resultTitle').textContent=t.result;
 });
