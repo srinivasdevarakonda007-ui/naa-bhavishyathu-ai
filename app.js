@@ -33,7 +33,11 @@ document.querySelector("#generate").onclick=async()=>{
      if(!img){img=document.createElement("img");document.querySelector("#poster").prepend(img)}
      img.src=imageResult.value.image;
    }else{
-     alert("Story వచ్చింది, కానీ portrait generationలో సమస్య: "+imageResult.reason.message);
+     const rawMsg=String(imageResult.reason?.message||"");
+     const safeMsg=/safety|rejected|policy/i.test(rawMsg)
+       ?"ఈ ఫోటోతో AI portrait తయారు చేయలేకపోయింది. ఇది మీ తప్పు కాదు; AI image safety check వల్ల ఈ ఫోటో process కాలేదు. మరో clear front-facing photoతో ప్రయత్నించండి."
+       :"Portrait తయారీలో తాత్కాలిక సమస్య వచ్చింది. మరోసారి ప్రయత్నించండి.";
+     alert(safeMsg);
    }
    document.querySelector("#actions").hidden=false;
    document.querySelector("#poster").scrollIntoView({behavior:"smooth"});
