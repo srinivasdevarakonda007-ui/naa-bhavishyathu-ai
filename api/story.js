@@ -16,7 +16,10 @@ export default async function handler(req, res) {
         profession,
         interests: profession + " career, discipline, learning",
         skills: "Not provided by user",
-        goal: "Write ONLY 3 very short inspirational sentences in natural Telugu for " + name + " dreaming of becoming a " + profession + ". Mention the selected profession. Encourage practice, discipline and learning. Do not ask questions. Do not mention missing information. Do not invent age, education, skills, achievements or qualifications. Do not give alternate careers. No English except the profession name if necessary. No headings, lists, Markdown, ** or ###. Keep the entire response under 55 Telugu words.",
+        goal: "LANGUAGE REQUIREMENT: Your entire answer MUST be written in Telugu script (తెలుగు) only. Write exactly 3 short inspirational Telugu sentences for " + name + " who dreams of the selected profession: " + profession + ". Do not ask questions. Do not mention missing details. Do not invent age, education, achievements or qualifications. Do not suggest other careers. No headings, lists, Markdown, hashtags or English prose. Maximum 55 words.",
+        language: "Telugu",
+        response_language: "te-IN",
+        output_format: "Exactly 3 short Telugu-script sentences only",
         country: country || "India",
         state: state || ""
       })
@@ -29,7 +32,12 @@ export default async function handler(req, res) {
 
     let output = data?.output || data?.text || data?.message || data?.response || "";
     output = String(output).replace(/#{1,6}\\s*/g, "").replace(/\\*\\*/g, "").replace(/__+/g, "").replace(/`+/g, "").replace(/\\n{3,}/g, "\\n\\n").trim();
-    if (output.length > 900) output = output.slice(0, 900).replace(/\\s+\\S*$/, "") + "…";
+    output = output.replace(/\\s+/g, " ").trim();
+    const teluguChars = (output.match(/[\\u0C00-\\u0C7F]/g) || []).length;
+    if (teluguChars < 12) {
+      output = name + " గారి " + profession + " కల ఎంతో అందమైన లక్ష్యం. ప్రతిరోజూ క్రమశిక్షణతో నేర్చుకుంటూ సాధన చేస్తే ఆ కలకు మరింత దగ్గరవుతారు. ఆత్మవిశ్వాసంతో ముందుకు సాగి మీ భవిష్యత్తును మీరే నిర్మించుకోండి.";
+    }
+    if (output.length > 520) output = output.slice(0, 520).replace(/\\s+\\S*$/, "") + "…";
     if (!output) return res.status(502).json({ error: "AI story service returned no text." });
     return res.status(200).json({ story: output });
   } catch (e) {
