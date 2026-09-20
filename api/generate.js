@@ -26,19 +26,21 @@ export default async function handler(req,res){
     if(!boundary) return res.status(400).json({error:"Invalid upload."});
     const bin=raw.toString("binary");
     const parts=bin.split("--"+boundary);
-    let image=null, profession="";
+    let image=null, profession="", country="India", state="Andhra Pradesh";
     for(const part of parts){
       const split=part.indexOf("\r\n\r\n"); if(split<0) continue;
       const head=part.slice(0,split), body=part.slice(split+4,-2);
       const name=head.match(/name="([^"]+)"/)?.[1];
       if(name==="profession") profession=Buffer.from(body,"binary").toString("utf8");
+      if(name==="country") country=Buffer.from(body,"binary").toString("utf8");
+      if(name==="state") state=Buffer.from(body,"binary").toString("utf8");
       if(name==="image"){const filename=head.match(/filename="([^"]*)"/)?.[1]||"portrait.jpg"; const type=head.match(/Content-Type:\s*([^\r\n]+)/i)?.[1]||"image/jpeg"; image={filename,type,data:Buffer.from(body,"binary")};}
     }
     if(!image||!profession) return res.status(400).json({error:"Photo and profession are required."});
     if(image.data.length>8*1024*1024) return res.status(413).json({error:"Photo is too large. Please use an image under 8 MB."});
     const form=new FormData();
     form.append("model","gpt-image-2");
-    form.append("prompt",(prompts[profession]||prompts["Entrepreneur"])+" Photorealistic premium studio quality, natural skin texture, realistic proportions, vertical portrait composition. Do not add text to the image.");
+    form.append("prompt",(prompts[profession]||prompts["Entrepreneur"])+" Location context: "+country+(country==="India"?", "+state:"")+". Photorealistic premium studio quality, natural skin texture, realistic proportions, vertical portrait composition. Do not add text to the image.");
     form.append("size","1024x1536");
     form.append("quality","medium");
     form.append("image",new Blob([image.data],{type:image.type}),image.filename);
