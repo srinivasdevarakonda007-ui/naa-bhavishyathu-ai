@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#6d28d9">
 <title>Naa Bhavishyathu AI</title>
 <link rel="stylesheet" href="style.css">
-</head>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script></head>
 <body>
 <header>
   <div class="brand">✨ Naa Bhavishyathu AI</div>
@@ -59,7 +59,11 @@
     <button class="secondary" id="print">🖨️ A4 Print</button>
     <button class="secondary" id="share">📲 WhatsApp Share</button>
   </div>
-  <p class="note">AI career/fantasy portrait • మీ photo AI generation కోసం మాత్రమే ఉపయోగించబడుతుంది</p>
+  <div id="paymentBox" class="create-box" hidden>
+  <div><span>EXTRA PORTRAITS</span><h2 id="paymentTitle">మరిన్ని AI Portraits</h2><p id="paymentText">Secure payment తర్వాత extra generation access పొందండి.</p></div>
+  <button class="primary" id="payBtn" type="button">💳 Pay & Continue</button>
+</div>
+<p class="note">AI career/fantasy portrait • మీ photo AI generation కోసం మాత్రమే ఉపయోగించబడుతుంది</p>
 </section>
 </main>
 <footer>Made for dreams • Naa Bhavishyathu AI</footer>
