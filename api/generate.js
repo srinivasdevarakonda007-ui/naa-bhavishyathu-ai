@@ -41,7 +41,6 @@ export default async function handler(req,res){
     form.append("prompt",(prompts[profession]||prompts["Entrepreneur"])+" Photorealistic premium studio quality, natural skin texture, realistic proportions, vertical portrait composition. Do not add text to the image.");
     form.append("size","1024x1536");
     form.append("quality","medium");
-    form.append("input_fidelity","high");
     form.append("image",new Blob([image.data],{type:image.type}),image.filename);
     const r=await fetch("https://api.openai.com/v1/images/edits",{method:"POST",headers:{Authorization:"Bearer "+process.env.OPENAI_API_KEY},body:form});
     const data=await r.json();
