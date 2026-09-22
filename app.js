@@ -109,3 +109,22 @@ async function startRazorpayPayment(){
  finally{if(btn){btn.dataset.processing="0";btn.disabled=false;btn.textContent="Pay ₹20 & Continue";}}
 }
 document.querySelector("#payBtn")?.addEventListener("click",startRazorpayPayment);
+
+function addAgentBubble(text,isUser=false){
+ const box=document.querySelector("#agentMessages"); if(!box)return;
+ const d=document.createElement("div");d.className="agent-bubble"+(isUser?" user":"");d.textContent=text;box.appendChild(d);box.scrollTop=box.scrollHeight;
+}
+document.querySelector("#askAgent")?.addEventListener("click",async()=>{
+ const input=document.querySelector("#agentQuestion"),btn=document.querySelector("#askAgent");
+ const question=input.value.trim(),name=document.querySelector("#personName").value.trim();
+ if(!selected)return alert("ముందుగా మీ Dream Profession ఎంచుకోండి.");
+ if(!question)return alert("Career Agentకి ఒక ప్రశ్న అడగండి.");
+ addAgentBubble(question,true);input.value="";btn.disabled=true;btn.textContent="ఆలోచిస్తోంది…";
+ try{
+  const r=await fetch("/api/career-agent",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,profession:selected,question,country:document.querySelector("#country").value,state:document.querySelector("#state").value})});
+  const d=await r.json();if(!r.ok)throw new Error(d.error||"Career Agent unavailable");
+  addAgentBubble(d.answer);
+ }catch(e){addAgentBubble("ప్రస్తుతం Career Agent స్పందించలేకపోయింది. కొద్దిసేపటి తర్వాత మళ్లీ ప్రయత్నించండి.");}
+ finally{btn.disabled=false;btn.textContent="అడగండి";}
+});
+document.querySelector("#agentQuestion")?.addEventListener("keydown",e=>{if(e.key==="Enter")document.querySelector("#askAgent")?.click();});
