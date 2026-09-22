@@ -69,8 +69,8 @@ document.querySelector("#share").onclick=async()=>{try{const b=await posterBlob(
 
 
 const uiText={
- te:{heroTitle:'మీ ఫోటో. మీ కల.<br><em>మీ భవిష్యత్తు.</em>',heroText:'మీ ఫోటోను మీ Dream Profession రూపంలో AI portraitగా మార్చండి. మీ పేరుతో చిన్న తెలుగు inspirational message కూడా పొందండి.',upload:'📷 ఫోటో ఎంచుకోండి',details:'మీ వివరాలు',name:'మీ పేరు',country:'దేశం',state:'రాష్ట్రం',profession:'మీ Dream Profession ఎంచుకోండి',create:'మీ Future Portrait తయారు చేయండి',createText:'Photo + Name + Profession సిద్ధంగా ఉంటే Generate నొక్కండి.',generate:'✨ AI Portrait తయారు చేయండి',result:'మీ Dream Portrait'},
- en:{heroTitle:'Your Photo. Your Dream.<br><em>Your Future.</em>',heroText:'Turn your photo into a premium AI dream-career portrait and get a short inspirational message with your name.',upload:'📷 Choose Photo',details:'Your Details',name:'Your Name',country:'Country',state:'State',profession:'Choose Your Dream Profession',create:'Create Your Future Portrait',createText:'When your photo, name and profession are ready, press Generate.',generate:'✨ Create AI Portrait',result:'Your Dream Portrait'}
+ te:{heroTitle:'మీ ఫోటో. మీ కల.<br><em>మీ భవిష్యత్తు.</em>',heroText:'మీ ఫోటోను మీ Dream Profession రూపంలో AI portraitగా మార్చండి. మీ పేరుతో చిన్న తెలుగు inspirational message కూడా పొందండి.',upload:'📷 ఫోటో ఎంచుకోండి',details:'మీ వివరాలు',name:'మీ పేరు',country:'దేశం',state:'రాష్ట్రం',profession:'మీ Dream Profession ఎంచుకోండి',create:'మీ Future Portrait తయారు చేయండి',createText:'Photo + Name + Profession సిద్ధంగా ఉంటే Generate నొక్కండి.',generate:'✨ AI Portrait తయారు చేయండి',result:'మీ Dream Portrait',agentTitle:'🤖 నా Career Agentని అడగండి',agentIntro:'మీ profession గురించి చదువు, skills, courses, career path వంటి ప్రశ్నలు తెలుగులో లేదా Englishలో అడగండి.',agentLabel:'✍️ మీ ప్రశ్న ఇక్కడ టైప్ చేయండి',agentPlaceholder:'ఉదా: Engineer కావాలంటే 10th తర్వాత ఏమి చదవాలి?',ask:'🤖 అడగండి'},
+ en:{heroTitle:'Your Photo. Your Dream.<br><em>Your Future.</em>',heroText:'Turn your photo into a premium AI dream-career portrait and get a short inspirational message with your name.',upload:'📷 Choose Photo',details:'Your Details',name:'Your Name',country:'Country',state:'State',profession:'Choose Your Dream Profession',create:'Create Your Future Portrait',createText:'When your photo, name and profession are ready, press Generate.',generate:'✨ Create AI Portrait',result:'Your Dream Portrait',agentTitle:'🤖 Ask My Career Agent',agentIntro:'Ask about education, skills, courses and career paths in English or Telugu.',agentLabel:'✍️ Type your question here',agentPlaceholder:'Example: What should I study after 10th to become an Engineer?',ask:'🤖 Ask'}
 };
 let uiLang='te';
 document.querySelector('#lang')?.addEventListener('click',()=>{
@@ -83,6 +83,9 @@ document.querySelector('#lang')?.addEventListener('click',()=>{
  document.querySelector('#createTitle').textContent=t.create;document.querySelector('#createText').textContent=t.createText;
  const g=document.querySelector('#generate');if(!g.disabled)g.textContent=t.generate;
  document.querySelector('#resultTitle').textContent=t.result;
+ document.querySelector('#agentTitle').textContent=t.agentTitle;document.querySelector('#agentIntro').textContent=t.agentIntro;
+ document.querySelector('#agentQuestionLabel').textContent=t.agentLabel;document.querySelector('#agentQuestion').placeholder=t.agentPlaceholder;
+ const ask=document.querySelector('#askAgent');if(!ask.disabled)ask.textContent=t.ask;
 });
 async function startRazorpayPayment(){
  const btn=document.querySelector("#payBtn");
@@ -121,10 +124,10 @@ document.querySelector("#askAgent")?.addEventListener("click",async()=>{
  if(!question)return alert("Career Agentకి ఒక ప్రశ్న అడగండి.");
  addAgentBubble(question,true);input.value="";btn.disabled=true;btn.textContent="ఆలోచిస్తోంది…";
  try{
-  const r=await fetch("/api/career-agent",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,profession:selected,question,country:document.querySelector("#country").value,state:document.querySelector("#state").value})});
+  const r=await fetch("/api/career-agent",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,profession:selected,question,country:document.querySelector("#country").value,state:document.querySelector("#state").value,language:uiLang})});
   const d=await r.json();if(!r.ok)throw new Error(d.error||"Career Agent unavailable");
   addAgentBubble(d.answer);
  }catch(e){addAgentBubble("ప్రస్తుతం Career Agent స్పందించలేకపోయింది. కొద్దిసేపటి తర్వాత మళ్లీ ప్రయత్నించండి.");}
- finally{btn.disabled=false;btn.textContent="అడగండి";}
+ finally{btn.disabled=false;btn.textContent=uiLang==="en"?"🤖 Ask":"🤖 అడగండి";}
 });
 document.querySelector("#agentQuestion")?.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();document.querySelector("#askAgent")?.click();}});
