@@ -85,7 +85,15 @@ document.querySelector('#lang')?.addEventListener('click',()=>{
  document.querySelector('#resultTitle').textContent=t.result;
 });
 async function startRazorpayPayment(){
- const btn=document.querySelector("#payBtn"); if(btn)btn.disabled=true;
+ const btn=document.querySelector("#payBtn");
+ const approvedHost="naa-bhavishyathu-ai.vercel.app";
+ if(location.hostname!==approvedHost){
+   alert("Secure payment కోసం approved Production website మాత్రమే ఉపయోగించండి.");
+   location.href="https://"+approvedHost+"/";
+   return;
+ }
+ if(btn?.dataset.processing==="1") return;
+ if(btn){btn.dataset.processing="1";btn.disabled=true;btn.textContent="Payment opening…";}
  try{
   const r=await fetch("/api/create-order",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
   const o=await r.json(); if(!r.ok)throw new Error(o.error||"Payment unavailable");
@@ -98,6 +106,6 @@ async function startRazorpayPayment(){
     else alert("Payment verification failed. Please contact support.");
    },theme:{color:"#6d28d9"}}).open();
  }catch(e){alert(e.message||"Payment service unavailable.");}
- finally{if(btn)btn.disabled=false;}
+ finally{if(btn){btn.dataset.processing="0";btn.disabled=false;btn.textContent="Pay ₹20 & Continue";}}
 }
 document.querySelector("#payBtn")?.addEventListener("click",startRazorpayPayment);
