@@ -1,10 +1,17 @@
 const N8N_WEBHOOK = "https://pavansai2013.app.n8n.cloud/webhook/naa-bhavishyathu-ai";
+const professionTelugu = {
+  "Police Officer":"పోలీస్ ఆఫీసర్","IAS Officer":"ఐఏఎస్ ఆఫీసర్","Lawyer":"న్యాయవాది",
+  "Sports Teacher":"క్రీడా ఉపాధ్యాయుడు","Athlete":"క్రీడాకారుడు","Doctor":"డాక్టర్",
+  "Teacher":"ఉపాధ్యాయుడు","Scientist":"శాస్త్రవేత్త","Pilot":"పైలట్",
+  "Army Officer":"ఆర్మీ ఆఫీసర్","Chef":"షెఫ్","Entrepreneur":"వ్యాపారవేత్త","Engineer":"ఇంజనీర్"
+};
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
   try {
     const { name, age, education, profession, country, state } = req.body || {};
     if (!name || !profession) return res.status(400).json({ error: "Name and profession are required." });
+    const professionTe = professionTelugu[profession] || profession;
 
     const r = await fetch(N8N_WEBHOOK, {
       method: "POST",
@@ -34,8 +41,12 @@ export default async function handler(req, res) {
     output = String(output).replace(/#{1,6}\\s*/g, "").replace(/\\*\\*/g, "").replace(/__+/g, "").replace(/`+/g, "").replace(/\\n{3,}/g, "\\n\\n").trim();
     output = output.replace(/\\s+/g, " ").trim();
     const teluguChars = (output.match(/[\\u0C00-\\u0C7F]/g) || []).length;
-    if (teluguChars < 12) {
-      output = name + " గారి " + profession + " కల ఎంతో అందమైన లక్ష్యం. ప్రతిరోజూ క్రమశిక్షణతో నేర్చుకుంటూ సాధన చేస్తే ఆ కలకు మరింత దగ్గరవుతారు. ఆత్మవిశ్వాసంతో ముందుకు సాగి మీ భవిష్యత్తును మీరే నిర్మించుకోండి.";
+    const otherProfessions = Object.entries(professionTelugu)
+      .filter(([key]) => key !== profession)
+      .flatMap(([key, value]) => [key.toLowerCase(), value]);
+    const mismatch = otherProfessions.some(p => output.toLowerCase().includes(p.toLowerCase()));
+    if (teluguChars < 12 || mismatch) {
+      output = name + " గారి " + professionTe + " కావాలనే కల ఎంతో అందమైన లక్ష్యం. ప్రతిరోజూ క్రమశిక్షణతో నేర్చుకుంటూ సాధన చేస్తే ఆ కలకు మరింత దగ్గరవుతారు. ఆత్మవిశ్వాసంతో ముందుకు సాగి మీ భవిష్యత్తును మీరే నిర్మించుకోండి.";
     }
     if (output.length > 520) output = output.slice(0, 520).replace(/\\s+\\S*$/, "") + "…";
     if (!output) return res.status(502).json({ error: "AI story service returned no text." });
