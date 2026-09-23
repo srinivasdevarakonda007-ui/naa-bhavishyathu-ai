@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="theme-color" content="#6d28d9">
 <title>Naa Bhavishyathu AI</title>
-<link rel="stylesheet" href="style.css?v=20260923-3">
+<link rel="stylesheet" href="style.css?v=20260923-4">
 <style>[hidden]{display:none!important}</style>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script></head>
 <body>
@@ -26,47 +26,24 @@
     <div id="preview"><span class="upload-hint">Clear front-facing photo ఉపయోగించండి</span></div>
   </div>
 </section>
-
 <section class="builder">
-  <div class="section-head">
-    <span>STEP 1</span><h2 id="detailsTitle">మీ వివరాలు</h2>
-  </div>
+  <div class="section-head"><span>STEP 1</span><h2 id="detailsTitle">మీ వివరాలు</h2></div>
   <div class="form-row">
     <label><b id="nameLabel">మీ పేరు</b><input id="personName" type="text" maxlength="50" placeholder="ఉదా: Pavan Sai"></label>
     <label><b id="countryLabel">దేశం</b><select id="country"><option value="India">India</option><option value="USA">USA</option><option value="UK">UK</option><option value="Canada">Canada</option><option value="Australia">Australia</option><option value="Other">Other</option></select></label>
     <label><b id="stateLabel">రాష్ట్రం</b><select id="state"><option value="Andhra Pradesh">Andhra Pradesh</option><option value="Telangana">Telangana</option><option value="Tamil Nadu">Tamil Nadu</option><option value="Karnataka">Karnataka</option><option value="Kerala">Kerala</option><option value="Maharashtra">Maharashtra</option><option value="Other">Other State</option></select></label>
   </div>
-
-  <div class="section-head profession-head">
-    <span>STEP 2</span><h2 id="professionTitle">మీ Dream Profession ఎంచుకోండి</h2>
-  </div>
+  <div class="section-head profession-head"><span>STEP 2</span><h2 id="professionTitle">మీ Dream Profession ఎంచుకోండి</h2></div>
   <div id="jobs" class="grid"></div>
-
-  <div class="create-box">
-    <div><span>STEP 3</span><h2 id="createTitle">మీ Future Portrait తయారు చేయండి</h2><p id="createText">Photo + Name + Profession సిద్ధంగా ఉంటే Generate నొక్కండి.</p></div>
-    <button class="primary generate" id="generate" type="button">✨ AI Portrait తయారు చేయండి</button>
-  </div>
+  <div class="create-box"><div><span>STEP 3</span><h2 id="createTitle">మీ Future Portrait తయారు చేయండి</h2><p id="createText">Photo + Name + Profession సిద్ధంగా ఉంటే Generate నొక్కండి.</p></div><button class="primary generate" id="generate" type="button">✨ AI Portrait తయారు చేయండి</button></div>
 </section>
-
 <section class="result">
   <div class="section-head centered"><span>YOUR RESULT</span><h2 id="resultTitle">మీ Dream Portrait</h2></div>
-  <div class="poster" id="poster">
-    <div class="placeholder">మీ result ఇక్కడ కనిపిస్తుంది</div>
-    <h3 id="role">నా భవిష్యత్తు</h3>
-    <p id="story">మీ కలకు రూపం ఇవ్వడానికి పై వివరాలు పూర్తి చేసి Generate నొక్కండి.</p>
-  </div>
-  <div id="actions" class="actions" hidden>
-    <button class="secondary" id="download">⬇️ HD Download</button>
-    <button class="secondary" id="print">🖨️ A4 Print</button>
-    <button class="secondary" id="share">📲 WhatsApp Share</button>
-  </div>
-  <div id="paymentBox" class="create-box" hidden>
-  <div><span>EXTRA PORTRAITS</span><h2 id="paymentTitle">మరిన్ని AI Portraits</h2><p id="paymentText">Secure payment తర్వాత extra generation access పొందండి.</p></div>
-  <button class="primary" id="payBtn" type="button">💳 Pay & Continue</button>
-</div>
-<p class="note">AI career/fantasy portrait • మీ photo AI generation కోసం మాత్రమే ఉపయోగించబడుతుంది</p>
+  <div class="poster" id="poster"><div class="placeholder">మీ result ఇక్కడ కనిపిస్తుంది</div><h3 id="role">నా భవిష్యత్తు</h3><p id="story">మీ కలకు రూపం ఇవ్వడానికి పై వివరాలు పూర్తి చేసి Generate నొక్కండి.</p></div>
+  <div id="actions" class="actions" hidden><button class="secondary" id="download">⬇️ HD Download</button><button class="secondary" id="print">🖨️ A4 Print</button><button class="secondary" id="share">📲 WhatsApp Share</button></div>
+  <div id="paymentBox" class="create-box" hidden><div><span>EXTRA PORTRAITS</span><h2 id="paymentTitle">మరిన్ని AI Portraits</h2><p id="paymentText">Secure payment తర్వాత extra generation access పొందండి.</p></div><button class="primary" id="payBtn" type="button">💳 Pay & Continue</button></div>
+  <p class="note">AI career/fantasy portrait • మీ photo AI generation కోసం మాత్రమే ఉపయోగించబడుతుంది</p>
 </section>
-
 <section class="career-agent">
   <span class="pill">PERSONAL AI CAREER GUIDE</span>
   <h2 id="agentTitle">🤖 నా Career Agentని అడగండి</h2>
@@ -76,16 +53,21 @@
   <div class="agent-input"><textarea id="agentQuestion" maxlength="300" rows="3" placeholder="ఉదా: Scientist కావాలంటే 10th తర్వాత ఏమి చదవాలి?"></textarea><button class="primary" id="askAgent" type="button">🤖 అడగండి</button></div>
   <div id="agentStatus" class="agent-status">Profession ఎంచుకున్న తర్వాత ఏ career question అయినా అడగవచ్చు.</div>
 </section>
-
+<section class="inspiration" aria-labelledby="inspiration-title">
+  <div class="inspiration-photo"><img src="/collector-inspiration.svg" alt="Sri Dr. N. Prabhakar Reddy, IAS"></div>
+  <div class="inspiration-copy">
+    <span class="pill">INSPIRATION FOR STUDENTS</span>
+    <h2 id="inspiration-title">Dream Big. Learn with Purpose. Serve with Integrity.</h2>
+    <h3>Sri Dr. N. Prabhakar Reddy, IAS</h3>
+    <p class="official-role">District Magistrate, Parvathipuram Manyam</p>
+    <p>విద్యార్థులు తమ లక్ష్యాన్ని స్పష్టంగా ఊహించుకొని, క్రమశిక్షణతో నేర్చుకుంటూ సమాజానికి ఉపయోగపడే భవిష్యత్తును నిర్మించుకోవాలని ప్రేరేపించే ప్రత్యేక విభాగం.</p>
+    <small>Photograph displayed in the student Inspiration Section with permission. This does not imply official endorsement of paid services.</small>
+  </div>
+</section>
 <section class="launch-info">
   <h2>Simple & Transparent</h2>
   <p>AI portrait generation uses paid AI processing. Extra portrait price: <strong>₹20 per generation</strong>.</p>
-  <div class="policy-links">
-    <a href="/privacy.html">Privacy Policy</a>
-    <a href="/terms.html">Terms</a>
-    <a href="/refund.html">Refund Policy</a>
-    <a href="/contact.html">Contact</a>
-  </div>
+  <div class="policy-links"><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms</a><a href="/refund.html">Refund Policy</a><a href="/contact.html">Contact</a></div>
 </section>
 </main>
 <footer><strong>Naa Bhavishyathu AI</strong><br><span>Dream Career Portrait & Personal AI Career Guide</span><br><small>Created by Devarakonda Srinivasa Rao</small></footer>
