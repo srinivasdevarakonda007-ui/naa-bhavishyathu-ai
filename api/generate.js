@@ -13,25 +13,77 @@ const prompts = {
   "Army Officer":"Transform the person into a fictional inspirational military career portrait, generic ceremonial uniform with no real unit insignia, no official credential. Preserve identity.",
   "Chef":"Transform the person into a premium professional chef portrait in a modern restaurant kitchen. Preserve identity.",
   "Entrepreneur":"Transform the person into a successful modern entrepreneur portrait in an elegant office. Preserve identity.",
-  "Engineer":"Transform the person into a professional engineer portrait in a modern technology workspace. Preserve identity."
+  "Engineer":"Transform the person into a professional engineer portrait in a modern technology workspace. Preserve identity.",
+  "Public Representative":"Transform the person into a neutral, fictional public-leadership portrait in a civic community setting, wearing dignified formal Indian attire. No political party logo, flag, election symbol, campaign slogan, ballot material or endorsement claim. Preserve identity and natural facial features.",
+  "Navy Officer":"Transform the person into a fictional inspirational naval-officer career portrait in a clean maritime setting, generic ceremonial naval-style uniform with no real insignia, unit marks, official badge or credential. Preserve identity.",
+  "Air Force Officer":"Transform the person into a fictional inspirational air-force career portrait near a modern aviation setting, generic formal uniform with no real insignia, squadron marks, official badge or credential. Preserve identity.",
+  "Nurse":"Transform the person into a compassionate professional nurse career portrait in a modern hospital environment, clean professional attire, no ID or credential claims. Preserve identity.",
+  "Pharmacist":"Transform the person into a professional pharmacist career portrait in a modern pharmacy or pharmaceutical workspace, clean professional attire. Preserve identity.",
+  "Software Developer":"Transform the person into a modern professional software developer portrait in a premium technology workspace with tasteful computer screens and coding atmosphere. Preserve identity.",
+  "Civil Engineer":"Transform the person into a professional civil engineer portrait at a safe modern infrastructure or construction-planning setting, wearing appropriate professional attire and safety gear. Preserve identity.",
+  "Chartered Accountant":"Transform the person into a premium professional chartered-accountancy career portrait in an elegant finance office, formal attire, no credential claims. Preserve identity.",
+  "Banker":"Transform the person into a premium professional banker portrait in a modern financial-office environment, formal attire, no real bank logos. Preserve identity.",
+  "Journalist":"Transform the person into a professional journalist career portrait in a modern newsroom or field-reporting setting, generic microphone with no real media logo. Preserve identity.",
+  "Farmer / Agri Entrepreneur":"Transform the person into an inspiring modern farmer and agri-entrepreneur portrait in a productive agricultural setting using modern farming technology. Preserve identity.",
+  "Forest Officer":"Transform the person into a fictional professional forest-officer career portrait in a natural forest setting, generic field uniform with no real department insignia or official credential. Preserve identity.",
+  "Fire & Rescue Officer":"Transform the person into a fictional professional fire-and-rescue career portrait in a safe training or station setting, generic protective uniform with no real department insignia. Preserve identity.",
+  "Social Worker":"Transform the person into an inspiring professional social-worker portrait in a community-development setting, warm and dignified. Preserve identity.",
+  "Artist / Designer":"Transform the person into a creative professional artist or designer portrait in a premium studio workspace with tasteful creative tools. Preserve identity.",
+  "Content Creator":"Transform the person into a professional digital content creator portrait in a modern studio with camera, microphone and editing workspace, no platform logos. Preserve identity."
 };
 
 const rateBuckets = globalThis.__nbaiRateBuckets || (globalThis.__nbaiRateBuckets = new Map());
 const RATE_WINDOW_MS = 60 * 60 * 1000;
-const RATE_MAX = 5;
-function allowRequest(req){
-  const ip=String(req.headers["x-forwarded-for"]||req.headers["x-real-ip"]||"unknown").split(",")[0].trim();
-  const now=Date.now();
-  const bucket=rateBuckets.get(ip);
-  if(!bucket || now-bucket.start>=RATE_WINDOW_MS){rateBuckets.set(ip,{start:now,count:1});return {ok:true};}
-  if(bucket.count>=RATE_MAX){return {ok:false,retryAfter:Math.max(1,Math.ceil((RATE_WINDOW_MS-(now-bucket.start))/60000))};}
-  bucket.count++; return {ok:true};
+const RATE_MAX = 15;
+function rateKey(req){
+  return String(req.headers["x-forwarded-for"]||req.headers["x-real-ip"]||"unknown").split(",")[0].trim();
+}
+function checkLimit(req){
+  const key=rateKey(req), now=Date.now(), bucket=rateBuckets.get(key);
+  if(!bucket || now-bucket.start>=RATE_WINDOW_MS) return {ok:true,key};
+  if(bucket.count>=RATE_MAX) return {ok:false,key,retryAfter:Math.max(1,Math.ceil((RATE_WINDOW_MS-(now-bucket.start))/60000))};
+  return {ok:true,key};
+}
+function recordSuccess(key){
+  const now=Date.now(), bucket=rateBuckets.get(key);
+  if(!bucket || now-bucket.start>=RATE_WINDOW_MS) rateBuckets.set(key,{start:now,count:1});
+  else bucket.count++;
+}
+
+function buildImageForm(image,profession,country,state){
+  const form=new FormData();
+  form.append("model","gpt-image-2");
+  form.append("prompt",(prompts[profession]||prompts["Entrepreneur"])+" Location context: "+country+(country==="India"?", "+state:"")+". Photorealistic premium studio quality, natural skin texture, realistic proportions, vertical portrait composition. Do not add text to the image.");
+  form.append("size","1024x1536");
+  form.append("quality","medium");
+  form.append("image",new Blob([image.data],{type:image.type}),image.filename);
+  return form;
+}
+
+async function callImageApi(image,profession,country,state){
+  let lastResponse=null,lastData=null;
+  for(let attempt=0;attempt<2;attempt++){
+    const r=await fetch("https://api.openai.com/v1/images/edits",{
+      method:"POST",
+      headers:{Authorization:"Bearer "+process.env.OPENAI_API_KEY},
+      body:buildImageForm(image,profession,country,state)
+    });
+    const data=await r.json().catch(()=>({}));
+    lastResponse=r; lastData=data;
+    if(r.ok) return {r,data};
+    if(attempt===0 && (r.status===429 || r.status>=500)){
+      await new Promise(resolve=>setTimeout(resolve,900));
+      continue;
+    }
+    break;
+  }
+  return {r:lastResponse,data:lastData};
 }
 
 export default async function handler(req,res){
   if(req.method!=="POST") return res.status(405).json({error:"POST only"});
-  const limit=allowRequest(req);
-  if(!limit.ok) return res.status(429).json({error:"Free generation limit reached. Please try again later.",code:"RATE_LIMIT",retryAfterMinutes:limit.retryAfter});
+  const limit=checkLimit(req);
+  if(!limit.ok) return res.status(429).json({error:"Generation limit reached for this network. Please try again later.",code:"RATE_LIMIT",retryAfterMinutes:limit.retryAfter});
   if(!process.env.OPENAI_API_KEY) return res.status(500).json({error:"Server API key is not configured."});
   try{
     const chunks=[]; for await(const chunk of req) chunks.push(chunk);
@@ -49,21 +101,26 @@ export default async function handler(req,res){
       if(name==="profession") profession=Buffer.from(body,"binary").toString("utf8");
       if(name==="country") country=Buffer.from(body,"binary").toString("utf8");
       if(name==="state") state=Buffer.from(body,"binary").toString("utf8");
-      if(name==="image"){const filename=head.match(/filename="([^"]*)"/)?.[1]||"portrait.jpg"; const type=head.match(/Content-Type:\s*([^\r\n]+)/i)?.[1]||"image/jpeg"; image={filename,type,data:Buffer.from(body,"binary")};}
+      if(name==="image"){
+        const filename=head.match(/filename="([^"]*)"/)?.[1]||"portrait.jpg";
+        const type=head.match(/Content-Type:\s*([^\r\n]+)/i)?.[1]||"image/jpeg";
+        image={filename,type,data:Buffer.from(body,"binary")};
+      }
     }
     if(!image||!profession) return res.status(400).json({error:"Photo and profession are required."});
+    if(!prompts[profession]) return res.status(400).json({error:"Please choose a supported profession."});
     if(image.data.length>8*1024*1024) return res.status(413).json({error:"Photo is too large. Please use an image under 8 MB."});
-    const form=new FormData();
-    form.append("model","gpt-image-2");
-    form.append("prompt",(prompts[profession]||prompts["Entrepreneur"])+" Location context: "+country+(country==="India"?", "+state:"")+". Photorealistic premium studio quality, natural skin texture, realistic proportions, vertical portrait composition. Do not add text to the image.");
-    form.append("size","1024x1536");
-    form.append("quality","medium");
-    form.append("image",new Blob([image.data],{type:image.type}),image.filename);
-    const r=await fetch("https://api.openai.com/v1/images/edits",{method:"POST",headers:{Authorization:"Bearer "+process.env.OPENAI_API_KEY},body:form});
-    const data=await r.json();
-    if(!r.ok) return res.status(r.status).json({error:data?.error?.message||"AI generation failed."});
+
+    const {r,data}=await callImageApi(image,profession,country,state);
+    if(!r?.ok){
+      const message=data?.error?.message||"AI generation failed.";
+      return res.status(r?.status||502).json({error:message,code:r?.status===429?"AI_BUSY":"AI_ERROR"});
+    }
     const b64=data?.data?.[0]?.b64_json;
-    if(!b64) return res.status(502).json({error:"No image returned."});
-    res.status(200).json({image:"data:image/png;base64,"+b64});
-  }catch(e){res.status(500).json({error:e?.message||"Unexpected server error."});}
+    if(!b64) return res.status(502).json({error:"No image returned.",code:"NO_IMAGE"});
+    recordSuccess(limit.key);
+    return res.status(200).json({image:"data:image/png;base64,"+b64});
+  }catch(e){
+    return res.status(500).json({error:e?.message||"Unexpected server error.",code:"SERVER_ERROR"});
+  }
 }
