@@ -1,3 +1,4 @@
+import {readEntitlement,writeEntitlement,publicEntitlement} from "./_entitlement.js";
 export const config = { api: { bodyParser: false } };
 
 const prompts = {
@@ -33,41 +34,33 @@ const prompts = {
 };
 
 const rateBuckets = globalThis.__nbaiRateBuckets || (globalThis.__nbaiRateBuckets = new Map());
+const activeGenerations = globalThis.__nbaiActiveGenerations || (globalThis.__nbaiActiveGenerations = new Set());
 const RATE_WINDOW_MS = 60 * 60 * 1000;
 const RATE_MAX = 15;
-function rateKey(req){
-  return String(req.headers["x-forwarded-for"]||req.headers["x-real-ip"]||"unknown").split(",")[0].trim();
+function checkLimit(sessionId){
+  const now=Date.now(), bucket=rateBuckets.get(sessionId);
+  if(!bucket || now-bucket.start>=RATE_WINDOW_MS) return {ok:true};
+  if(bucket.count>=RATE_MAX) return {ok:false,retryAfter:Math.max(1,Math.ceil((RATE_WINDOW_MS-(now-bucket.start))/60000))};
+  return {ok:true};
 }
-function checkLimit(req){
-  const key=rateKey(req), now=Date.now(), bucket=rateBuckets.get(key);
-  if(!bucket || now-bucket.start>=RATE_WINDOW_MS) return {ok:true,key};
-  if(bucket.count>=RATE_MAX) return {ok:false,key,retryAfter:Math.max(1,Math.ceil((RATE_WINDOW_MS-(now-bucket.start))/60000))};
-  return {ok:true,key};
-}
-function recordSuccess(key){
-  const now=Date.now(), bucket=rateBuckets.get(key);
-  if(!bucket || now-bucket.start>=RATE_WINDOW_MS) rateBuckets.set(key,{start:now,count:1});
+function recordSuccess(sessionId){
+  const now=Date.now(), bucket=rateBuckets.get(sessionId);
+  if(!bucket || now-bucket.start>=RATE_WINDOW_MS) rateBuckets.set(sessionId,{start:now,count:1});
   else bucket.count++;
 }
-
 function buildImageForm(image,profession,country,state){
   const form=new FormData();
   form.append("model","gpt-image-2");
-  form.append("prompt",(prompts[profession]||prompts["Entrepreneur"])+" Location context: "+country+(country==="India"?", "+state:"")+". Photorealistic premium studio quality, natural skin texture, realistic proportions, vertical portrait composition. Do not add text to the image.");
+  form.append("prompt",prompts[profession]+" Location context: "+country+(country==="India"?", "+state:"")+". Photorealistic premium studio quality, natural skin texture, realistic proportions, vertical portrait composition. Do not add text to the image.");
   form.append("size","1024x1536");
   form.append("quality","medium");
   form.append("image",new Blob([image.data],{type:image.type}),image.filename);
   return form;
 }
-
 async function callImageApi(image,profession,country,state){
   let lastResponse=null,lastData=null;
   for(let attempt=0;attempt<2;attempt++){
-    const r=await fetch("https://api.openai.com/v1/images/edits",{
-      method:"POST",
-      headers:{Authorization:"Bearer "+process.env.OPENAI_API_KEY},
-      body:buildImageForm(image,profession,country,state)
-    });
+    const r=await fetch("https://api.openai.com/v1/images/edits",{method:"POST",headers:{Authorization:"Bearer "+process.env.OPENAI_API_KEY},body:buildImageForm(image,profession,country,state)});
     const data=await r.json().catch(()=>({}));
     lastResponse=r; lastData=data;
     if(r.ok) return {r,data};
@@ -82,9 +75,20 @@ async function callImageApi(image,profession,country,state){
 
 export default async function handler(req,res){
   if(req.method!=="POST") return res.status(405).json({error:"POST only"});
-  const limit=checkLimit(req);
-  if(!limit.ok) return res.status(429).json({error:"Generation limit reached for this network. Please try again later.",code:"RATE_LIMIT",retryAfterMinutes:limit.retryAfter});
   if(!process.env.OPENAI_API_KEY) return res.status(500).json({error:"Server API key is not configured."});
+
+  const state=readEntitlement(req);
+  const useFree=!state.freeUsed;
+  const usePaid=!useFree && state.credits>0;
+  if(!useFree&&!usePaid){
+    writeEntitlement(res,state);
+    return res.status(402).json({error:"Your free portrait has been used. Pay ₹20 to unlock one extra portrait.",code:"PAYMENT_REQUIRED",...publicEntitlement(state)});
+  }
+  const limit=checkLimit(state.sid);
+  if(!limit.ok) return res.status(429).json({error:"Generation limit reached for this session. Please try again later.",code:"RATE_LIMIT",retryAfterMinutes:limit.retryAfter});
+  if(activeGenerations.has(state.sid)) return res.status(409).json({error:"A portrait is already being generated. Please wait for it to finish.",code:"GENERATION_IN_PROGRESS"});
+
+  activeGenerations.add(state.sid);
   try{
     const chunks=[]; for await(const chunk of req) chunks.push(chunk);
     const raw=Buffer.concat(chunks);
@@ -93,14 +97,14 @@ export default async function handler(req,res){
     if(!boundary) return res.status(400).json({error:"Invalid upload."});
     const bin=raw.toString("binary");
     const parts=bin.split("--"+boundary);
-    let image=null, profession="", country="India", state="Andhra Pradesh";
+    let image=null, profession="", country="India", stateName="Andhra Pradesh";
     for(const part of parts){
       const split=part.indexOf("\r\n\r\n"); if(split<0) continue;
       const head=part.slice(0,split), body=part.slice(split+4,-2);
       const name=head.match(/name="([^"]+)"/)?.[1];
       if(name==="profession") profession=Buffer.from(body,"binary").toString("utf8");
       if(name==="country") country=Buffer.from(body,"binary").toString("utf8");
-      if(name==="state") state=Buffer.from(body,"binary").toString("utf8");
+      if(name==="state") stateName=Buffer.from(body,"binary").toString("utf8");
       if(name==="image"){
         const filename=head.match(/filename="([^"]*)"/)?.[1]||"portrait.jpg";
         const type=head.match(/Content-Type:\s*([^\r\n]+)/i)?.[1]||"image/jpeg";
@@ -111,16 +115,22 @@ export default async function handler(req,res){
     if(!prompts[profession]) return res.status(400).json({error:"Please choose a supported profession."});
     if(image.data.length>8*1024*1024) return res.status(413).json({error:"Photo is too large. Please use an image under 8 MB."});
 
-    const {r,data}=await callImageApi(image,profession,country,state);
+    const {r,data}=await callImageApi(image,profession,country,stateName);
     if(!r?.ok){
       const message=data?.error?.message||"AI generation failed.";
-      return res.status(r?.status||502).json({error:message,code:r?.status===429?"AI_BUSY":"AI_ERROR"});
+      return res.status(r?.status||502).json({error:message,code:r?.status===429?"AI_BUSY":"AI_ERROR",...publicEntitlement(state)});
     }
     const b64=data?.data?.[0]?.b64_json;
-    if(!b64) return res.status(502).json({error:"No image returned.",code:"NO_IMAGE"});
-    recordSuccess(limit.key);
-    return res.status(200).json({image:"data:image/png;base64,"+b64});
+    if(!b64) return res.status(502).json({error:"No image returned.",code:"NO_IMAGE",...publicEntitlement(state)});
+
+    if(useFree) state.freeUsed=true;
+    else state.credits=Math.max(0,state.credits-1);
+    recordSuccess(state.sid);
+    writeEntitlement(res,state);
+    return res.status(200).json({image:"data:image/png;base64,"+b64,usedFree:useFree,usedPaid:usePaid,...publicEntitlement(state)});
   }catch(e){
-    return res.status(500).json({error:e?.message||"Unexpected server error.",code:"SERVER_ERROR"});
+    return res.status(500).json({error:e?.message||"Unexpected server error.",code:"SERVER_ERROR",...publicEntitlement(state)});
+  }finally{
+    activeGenerations.delete(state.sid);
   }
 }
