@@ -1,8 +1,9 @@
 import crypto from "crypto";
 import {readEntitlement,writeEntitlement,publicEntitlement} from "./_entitlement.js";
 
+const APPROVED_HOST="naa-bhavishyathu-ai.vercel.app";
 const usedPayments = globalThis.__nbaiUsedPayments || (globalThis.__nbaiUsedPayments = new Set());
-
+function validHost(req){return String(req.headers["x-forwarded-host"]||req.headers.host||"").split(",")[0].trim()===APPROVED_HOST;}
 async function razorpayGet(path,key,secret){
   const auth=Buffer.from(key+":"+secret).toString("base64");
   const r=await fetch("https://api.razorpay.com/v1/"+path,{headers:{Authorization:"Basic "+auth}});
@@ -12,6 +13,7 @@ async function razorpayGet(path,key,secret){
 
 export default async function handler(req,res){
   if(req.method!=="POST") return res.status(405).json({error:"POST only"});
+  if(!validHost(req)) return res.status(403).json({error:"Payment verification is available only on the official website."});
   const key=String(process.env.RAZORPAY_KEY_ID||"").trim();
   const secret=String(process.env.RAZORPAY_KEY_SECRET||"").trim();
   if(!key||!secret) return res.status(503).json({error:"Payments are not configured yet."});
