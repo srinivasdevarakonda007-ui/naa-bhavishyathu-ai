@@ -1,6 +1,7 @@
 import {readEntitlement,writeEntitlement,publicEntitlement} from "./_entitlement.js";
 export const config = { api: { bodyParser: false } };
 
+const APPROVED_HOST="naa-bhavishyathu-ai.vercel.app";
 const prompts = {
   "IAS Officer":"Transform the person into a dignified fictional Indian civil-service leadership career portrait in elegant formal attire, premium government-office-inspired setting, no official emblem, no ID card, no credential claim. Preserve identity and natural facial features.",
   "Police Officer":"Transform the person into a dignified fictional professional police-officer career portrait. Generic clean uniform, no real department insignia, no official ID, no document. Preserve the person's identity, facial structure, skin tone, hairstyle and age as closely as possible.",
@@ -37,6 +38,7 @@ const rateBuckets = globalThis.__nbaiRateBuckets || (globalThis.__nbaiRateBucket
 const activeGenerations = globalThis.__nbaiActiveGenerations || (globalThis.__nbaiActiveGenerations = new Set());
 const RATE_WINDOW_MS = 60 * 60 * 1000;
 const RATE_MAX = 15;
+function validHost(req){return String(req.headers["x-forwarded-host"]||req.headers.host||"").split(",")[0].trim()===APPROVED_HOST;}
 function checkLimit(sessionId){
   const now=Date.now(), bucket=rateBuckets.get(sessionId);
   if(!bucket || now-bucket.start>=RATE_WINDOW_MS) return {ok:true};
@@ -75,6 +77,7 @@ async function callImageApi(image,profession,country,state){
 
 export default async function handler(req,res){
   if(req.method!=="POST") return res.status(405).json({error:"POST only"});
+  if(!validHost(req)) return res.status(403).json({error:"AI Portrait generation is available only on the official Naa Bhavishyathu AI website.",code:"INVALID_HOST"});
   if(!process.env.OPENAI_API_KEY) return res.status(500).json({error:"Server API key is not configured."});
 
   const state=readEntitlement(req);
