@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://naa-bhavishyathu-ai.vercel.app/sitemap.xml
