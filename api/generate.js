@@ -74,11 +74,21 @@ async function callImageApi(image,profession,country,state){
   }
   return {r:lastResponse,data:lastData};
 }
+function apiErrorCode(status,message){
+  const m=String(message||"").toLowerCase();
+  if(status===401||status===403) return "API_AUTH";
+  if(status===429 && /quota|billing|credit|limit/.test(m)) return "API_QUOTA";
+  if(status===429) return "AI_BUSY";
+  if(status===400 && /model/.test(m)) return "MODEL_ERROR";
+  if(status===400 && /image|format|size|input/.test(m)) return "IMAGE_INPUT_ERROR";
+  if(status>=500) return "AI_BUSY";
+  return "AI_ERROR";
+}
 
 export default async function handler(req,res){
   if(req.method!=="POST") return res.status(405).json({error:"POST only"});
   if(!validHost(req)) return res.status(403).json({error:"AI Portrait generation is available only on the official Naa Bhavishyathu AI website.",code:"INVALID_HOST"});
-  if(!process.env.OPENAI_API_KEY) return res.status(500).json({error:"Server API key is not configured."});
+  if(!process.env.OPENAI_API_KEY) return res.status(500).json({error:"Server API key is not configured.",code:"API_KEY_MISSING"});
 
   const state=readEntitlement(req);
   const useFree=!state.freeUsed;
@@ -97,7 +107,7 @@ export default async function handler(req,res){
     const raw=Buffer.concat(chunks);
     const ct=req.headers["content-type"]||"";
     const boundary=ct.match(/boundary=(?:"([^"]+)"|([^;]+))/)?.slice(1).find(Boolean);
-    if(!boundary) return res.status(400).json({error:"Invalid upload."});
+    if(!boundary) return res.status(400).json({error:"Invalid upload.",code:"UPLOAD_ERROR"});
     const bin=raw.toString("binary");
     const parts=bin.split("--"+boundary);
     let image=null, profession="", country="India", stateName="Andhra Pradesh";
@@ -114,14 +124,14 @@ export default async function handler(req,res){
         image={filename,type,data:Buffer.from(body,"binary")};
       }
     }
-    if(!image||!profession) return res.status(400).json({error:"Photo and profession are required."});
-    if(!prompts[profession]) return res.status(400).json({error:"Please choose a supported profession."});
-    if(image.data.length>8*1024*1024) return res.status(413).json({error:"Photo is too large. Please use an image under 8 MB."});
+    if(!image||!profession) return res.status(400).json({error:"Photo and profession are required.",code:"UPLOAD_ERROR"});
+    if(!prompts[profession]) return res.status(400).json({error:"Please choose a supported profession.",code:"UNSUPPORTED_PROFESSION"});
+    if(image.data.length>8*1024*1024) return res.status(413).json({error:"Photo is too large. Please use an image under 8 MB.",code:"IMAGE_TOO_LARGE"});
 
     const {r,data}=await callImageApi(image,profession,country,stateName);
     if(!r?.ok){
       const message=data?.error?.message||"AI generation failed.";
-      return res.status(r?.status||502).json({error:message,code:r?.status===429?"AI_BUSY":"AI_ERROR",...publicEntitlement(state)});
+      return res.status(r?.status||502).json({error:message,code:apiErrorCode(r?.status||502,message),...publicEntitlement(state)});
     }
     const b64=data?.data?.[0]?.b64_json;
     if(!b64) return res.status(502).json({error:"No image returned.",code:"NO_IMAGE",...publicEntitlement(state)});
