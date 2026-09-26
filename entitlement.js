@@ -48,6 +48,22 @@ document.querySelector("#jobs")?.addEventListener("click",e=>{
   if(e.target.closest(".job") && document.querySelector("#poster img")) markResultPending();
 });
 
+function generationErrorMessage(e){
+  const en=uiLang==="en";
+  const code=e?.code||"";
+  const raw=String(e?.message||"");
+  if(code==="PAYMENT_REQUIRED") return en?"Payment is required for the next portrait.":"తదుపరి AI Portrait కోసం ₹20 payment అవసరం.";
+  if(code==="GENERATION_IN_PROGRESS") return en?"A portrait is already being generated. Please wait.":"ఒక portrait ఇప్పటికే తయారవుతోంది. అది పూర్తయ్యే వరకు వేచి ఉండండి.";
+  if(code==="RATE_LIMIT") return en?"Generation limit reached. Please try again later.":"Generation limit చేరుకుంది. కొంతసేపటి తర్వాత మళ్లీ ప్రయత్నించండి.";
+  if(code==="API_KEY_MISSING"||code==="API_AUTH") return en?"AI server connection is not configured correctly. Please contact the site owner.":"AI server connection configurationలో సమస్య ఉంది. Site owner settings check చేయాలి.";
+  if(code==="API_QUOTA") return en?"AI API quota/billing limit has been reached. No credit was consumed.":"AI API quota/billing limit చేరుకుంది. మీ free chance/paid credit తగ్గలేదు.";
+  if(code==="MODEL_ERROR") return en?"AI image model configuration needs an update. No credit was consumed.":"AI image model configuration update అవసరం. మీ free chance/paid credit తగ్గలేదు.";
+  if(code==="IMAGE_INPUT_ERROR"||code==="UPLOAD_ERROR"||code==="IMAGE_TOO_LARGE") return en?(raw||"Please try another clear image under 8 MB."):(raw||"మరో clear photoతో ప్రయత్నించండి. Photo 8 MB లోపు ఉండాలి.");
+  if(/safety|rejected|policy/i.test(raw)) return en?"This photo could not be processed by the AI safety check. Please try another clear front-facing photo.":"ఈ ఫోటో AI safety checkలో process కాలేదు. మరో clear front-facing photoతో ప్రయత్నించండి.";
+  if(code==="AI_BUSY") return en?"AI service is temporarily busy. No credit was consumed. Please try again.":"AI service ప్రస్తుతం busyగా ఉంది. మీ free chance/paid credit తగ్గలేదు. మరోసారి ప్రయత్నించండి.";
+  return en?`Generation failed: ${raw||"Unknown error"}. No credit was consumed.`:`Generation failed: ${raw||"Unknown error"}. మీ free chance/paid credit తగ్గలేదు.`;
+}
+
 async function secureGenerate(){
   await refreshEntitlement();
   if(!entitlementState.freeAvailable && entitlementState.credits<1){
@@ -82,14 +98,9 @@ async function secureGenerate(){
       if(e.data) setEntitlementState(e.data);
       restoreLastSuccessful();
       if(e.code==="PAYMENT_REQUIRED"){
-        paymentBox().hidden=false;paymentBox().scrollIntoView({behavior:"smooth"});
-        return alert(uiLang==="en"?"Payment is required for the next portrait.":"తదుపరి AI Portrait కోసం ₹20 payment అవసరం.");
+        const box=paymentBox(); if(box){box.hidden=false;box.scrollIntoView({behavior:"smooth"});}
       }
-      if(e.code==="GENERATION_IN_PROGRESS") return alert(uiLang==="en"?"A portrait is already being generated. Please wait.":"ఒక portrait ఇప్పటికే తయారవుతోంది. అది పూర్తయ్యే వరకు వేచి ఉండండి.");
-      if(e.code==="RATE_LIMIT") return alert(uiLang==="en"?"Generation limit reached. Please try again later.":"Generation limit చేరుకుంది. కొంతసేపటి తర్వాత మళ్లీ ప్రయత్నించండి.");
-      const raw=String(e.message||"");
-      if(/safety|rejected|policy/i.test(raw)) return alert(uiLang==="en"?"This photo could not be processed by the AI safety check. Please try another clear front-facing photo.":"ఈ ఫోటో AI safety checkలో process కాలేదు. మరో clear front-facing photoతో ప్రయత్నించండి.");
-      return alert(uiLang==="en"?"AI service is temporarily busy. Your free chance/paid credit was not consumed. Please try again.":"AI service ప్రస్తుతం busyగా ఉంది. మీ free chance/paid credit తగ్గలేదు. మరోసారి ప్రయత్నించండి.");
+      return alert(generationErrorMessage(e));
     }
 
     const imageData=imageResult.value;
@@ -107,7 +118,7 @@ async function secureGenerate(){
     document.querySelector("#poster").scrollIntoView({behavior:"smooth"});
   }catch(e){
     restoreLastSuccessful();
-    alert(uiLang==="en"?"Unexpected generation error. No credit was consumed.":"Generationలో అనుకోని సమస్య వచ్చింది. మీ credit తగ్గలేదు.");
+    alert(generationErrorMessage(e));
   }finally{
     btn.disabled=false;btn.textContent=old;
   }
