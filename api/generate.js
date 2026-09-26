@@ -38,7 +38,13 @@ const rateBuckets = globalThis.__nbaiRateBuckets || (globalThis.__nbaiRateBucket
 const activeGenerations = globalThis.__nbaiActiveGenerations || (globalThis.__nbaiActiveGenerations = new Set());
 const RATE_WINDOW_MS = 60 * 60 * 1000;
 const RATE_MAX = 15;
-function validHost(req){return String(req.headers["x-forwarded-host"]||req.headers.host||"").split(",")[0].trim()===APPROVED_HOST;}
+function validHost(req){
+  const host=String(req.headers["x-forwarded-host"]||req.headers.host||"").split(",")[0].trim();
+  const deploymentHost=String(process.env.VERCEL_URL||"").trim();
+  const branchHost=String(process.env.VERCEL_BRANCH_URL||"").trim();
+  const productionHost=String(process.env.VERCEL_PROJECT_PRODUCTION_URL||"").trim();
+  return host===APPROVED_HOST || host===deploymentHost || host===branchHost || host===productionHost;
+}
 function checkLimit(sessionId){
   const now=Date.now(), bucket=rateBuckets.get(sessionId);
   if(!bucket || now-bucket.start>=RATE_WINDOW_MS) return {ok:true};
