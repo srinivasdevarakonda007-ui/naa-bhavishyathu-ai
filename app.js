@@ -64,7 +64,20 @@ async function posterBlob(){
 }
 document.querySelector("#download").onclick=async()=>{try{const b=await posterBlob(),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=(document.querySelector("#personName").value.trim()||"portrait")+"-"+(selected||"career")+".jpg";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}catch(e){alert(e.message)}};
 document.querySelector("#print").onclick=async()=>{try{const b=await posterBlob(),u=URL.createObjectURL(b),w=window.open("","_blank");w.document.write('<html><head><title>A4 Print</title><style>@page{size:A4 portrait;margin:0}body{margin:0}img{width:210mm;height:297mm;object-fit:contain;display:block}</style></head><body><img src="'+u+'" onload="window.print()"></body></html>');w.document.close()}catch(e){alert(e.message)}};
-document.querySelector("#share").onclick=async()=>{try{const b=await posterBlob(),file=new File([b],"naa-bhavishyathu-ai.jpg",{type:"image/jpeg"});if(navigator.share&&navigator.canShare?.({files:[file]})){await navigator.share({title:document.querySelector("#role").textContent,text:"Naa Bhavishyathu AI — నా Dream Career Portrait",files:[file]})}else{window.open("https://wa.me/?text="+encodeURIComponent(document.querySelector("#role").textContent+" — Naa Bhavishyathu AI"),"_blank")}}catch(e){if(e.name!=="AbortError")alert(e.message)}};
+document.querySelector("#share").onclick=async()=>{try{
+ const b=await posterBlob();
+ const file=new File([b],"naa-bhavishyathu-ai.jpg",{type:"image/jpeg"});
+ const siteUrl="https://naa-bhavishyathu-ai.vercel.app/";
+ const role=document.querySelector("#role").textContent;
+ const shareText=role+"\n\n✨ Naa Bhavishyathu AI\nమీ ఫోటోను మీ Dream Profession రూపంలో AI Portraitగా మార్చుకోండి.\n🌐 "+siteUrl;
+ if(navigator.share&&navigator.canShare?.({files:[file]})){
+   await navigator.share({title:"Naa Bhavishyathu AI",text:shareText,url:siteUrl,files:[file]});
+ }else{
+   const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="naa-bhavishyathu-ai.jpg";a.click();
+   setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+   window.open("https://wa.me/?text="+encodeURIComponent(shareText),"_blank");
+ }
+}catch(e){if(e.name!=="AbortError")alert(e.message)}};
 
 
 
