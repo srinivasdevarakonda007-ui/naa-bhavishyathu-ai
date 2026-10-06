@@ -8,6 +8,7 @@ const prompts = {
   "Lawyer":"Transform the person into a premium professional lawyer portrait in formal black advocate attire, elegant legal-office background. Preserve identity and natural facial features.",
   "Sports Teacher":"Transform the person into a confident professional physical education teacher portrait on a modern school sports ground, premium sportswear, whistle, tasteful athletic atmosphere. Preserve identity.",
   "Athlete":"Transform the person into an elite inspirational athlete portrait in a stadium, premium sports kit, dynamic but realistic. Preserve identity.",
+  "Cricketer":"Transform the person into a professional inspirational cricketer portrait in a modern cricket stadium, wearing premium generic cricket whites or match kit, holding a cricket bat in a natural pose. No real team logos, national emblems, sponsor marks or official credential claims. Preserve identity, facial structure, skin tone, hairstyle and age as closely as possible.",
   "Doctor":"Transform the person into a professional doctor career portrait with clean white coat and modern clinic background, no ID card or credential claims. Preserve identity.",
   "Teacher":"Transform the person into a warm professional teacher portrait in a modern classroom. Preserve identity.",
   "Scientist":"Transform the person into a professional scientist portrait in a modern research laboratory. Preserve identity.",
