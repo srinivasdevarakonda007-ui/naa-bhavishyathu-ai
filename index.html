@@ -18,7 +18,9 @@
 [hidden]{display:none!important}
 .creator-section{display:grid;grid-template-columns:180px minmax(0,1fr);gap:28px;align-items:center;margin:28px auto;padding:28px;max-width:1100px;border:1px solid rgba(109,40,217,.16);border-radius:24px;background:linear-gradient(135deg,#faf7ff 0%,#ffffff 62%,#f5f3ff 100%);box-shadow:0 12px 34px rgba(55,32,95,.08)}
 .creator-photo{display:flex;justify-content:center;align-items:center}.creator-photo img{width:170px;height:170px;object-fit:cover;border-radius:50%;border:5px solid #fff;box-shadow:0 10px 28px rgba(76,29,149,.22);background:#ede9fe}.creator-copy .pill{display:inline-flex;margin-bottom:8px}.creator-copy h2{margin:4px 0 5px;font-size:clamp(1.45rem,2.5vw,2.05rem);line-height:1.15}.creator-role{margin:0 0 12px;font-weight:700;color:#6d28d9}.creator-copy p{margin:8px 0;line-height:1.7}.creator-trust{font-weight:700;color:#374151}.creator-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.creator-tags span{padding:7px 11px;border-radius:999px;background:#ede9fe;color:#5b21b6;font-size:.9rem;font-weight:700}
-@media(max-width:700px){.creator-section{grid-template-columns:1fr;text-align:center;padding:22px 18px}.creator-photo img{width:145px;height:145px}.creator-tags{justify-content:center}}
+.result-agent{margin:24px auto 8px;max-width:900px;padding:24px;border:1px solid rgba(109,40,217,.18);border-radius:22px;background:linear-gradient(180deg,#fbfaff 0%,#fff 100%);box-shadow:0 10px 28px rgba(55,32,95,.07)}
+.result-agent h2{margin:8px 0}.result-agent .agent-messages{margin-top:14px}
+@media(max-width:700px){.creator-section{grid-template-columns:1fr;text-align:center;padding:22px 18px}.creator-photo img{width:145px;height:145px}.creator-tags{justify-content:center}.result-agent{padding:18px 14px;margin-top:18px}}
 </style>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -59,20 +61,21 @@
 <section class="result">
   <div class="section-head centered"><span>YOUR RESULT</span><h2 id="resultTitle">మీ Dream Portrait</h2></div>
   <div class="poster" id="poster"><div class="placeholder">మీ result ఇక్కడ కనిపిస్తుంది</div><h3 id="role">నా భవిష్యత్తు</h3><p id="story">మీ కలకు రూపం ఇవ్వడానికి పై వివరాలు పూర్తి చేసి Generate నొక్కండి.</p></div>
+
+  <div class="career-agent result-agent">
+    <span class="pill">PERSONAL AI CAREER GUIDE</span>
+    <h2 id="agentTitle">🤖 మీ Portraitకి Career Guidance</h2>
+    <p id="agentIntro">మీరు ఎంచుకున్న profession గురించి చదువు, skills, courses, eligibility, career path మరియు next steps గురించి తెలుగులో లేదా Englishలో అడగండి.</p>
+    <div id="agentMessages" class="agent-messages"><div class="agent-bubble">మీ Dream Profession ఎంచుకున్న తర్వాత, ఈ portraitకి సంబంధించిన career guidance ఇక్కడ పొందవచ్చు.</div></div>
+    <label class="agent-question-label" id="agentQuestionLabel" for="agentQuestion">✍️ మీ ప్రశ్న ఇక్కడ టైప్ చేయండి</label>
+    <div class="agent-input"><textarea id="agentQuestion" maxlength="300" rows="3" placeholder="ఉదా: Scientist కావాలంటే 10th తర్వాత ఏమి చదవాలి?"></textarea><button class="primary" id="askAgent" type="button">🤖 అడగండి</button></div>
+    <div id="agentStatus" class="agent-status">Profession ఎంచుకున్న తర్వాత ఏ career question అయినా అడగవచ్చు.</div>
+  </div>
+
   <div id="actions" class="actions" hidden><button class="secondary" id="download">⬇️ HD Download</button><button class="secondary" id="print">🖨️ A4 Print</button><button class="secondary" id="share">📲 WhatsApp Share</button></div>
-  <div class="career-agent portrait-career-guide">
-  <span class="pill">PERSONAL AI CAREER GUIDE</span>
-  <h2 id="agentTitle">🤖 నా Career Agentని అడగండి</h2>
-  <p id="agentIntro">మీరు ఎంచుకున్న profession గురించి చదువు, skills, courses, career path వంటి ప్రశ్నలు తెలుగులో లేదా Englishలో అడగండి.</p>
-  <div id="agentMessages" class="agent-messages"><div class="agent-bubble">మీ Career Agent సిద్ధంగా ఉంది. ముందుగా పై నుంచి Dream Profession ఎంచుకోండి.</div></div>
-  <label class="agent-question-label" id="agentQuestionLabel" for="agentQuestion">✍️ మీ ప్రశ్న ఇక్కడ టైప్ చేయండి</label>
-  <div class="agent-input"><textarea id="agentQuestion" maxlength="300" rows="3" placeholder="ఉదా: Scientist కావాలంటే 10th తర్వాత ఏమి చదవాలి?"></textarea><button class="primary" id="askAgent" type="button">🤖 అడగండి</button></div>
-  <div id="agentStatus" class="agent-status">Profession ఎంచుకున్న తర్వాత ఏ career question అయినా అడగవచ్చు.</div>
-</div>
   <div id="paymentBox" class="create-box" hidden><div><span>EXTRA PORTRAITS</span><h2 id="paymentTitle">మరిన్ని AI Portraits</h2><p id="paymentText">First portrait FREE. ప్రతి ₹20 paymentకి 1 extra portrait credit. Successful generation అయినప్పుడే credit తగ్గుతుంది.</p></div><button class="primary" id="payBtn" type="button">💳 Pay ₹20 & Continue</button></div>
   <p class="note">AI career/fantasy portrait • మీ photo AI generation కోసం మాత్రమే ఉపయోగించబడుతుంది</p>
 </section>
-
 <section class="inspiration" aria-labelledby="inspiration-title">
   <div class="inspiration-photo"><img src="/Screenshot_2026-09-23-10-25-00-75_3b224f628d910d58c5eadad3af98c9c7.jpg" alt="Sri Dr. N. Prabhakar Reddy, IAS"></div>
   <div class="inspiration-copy">
