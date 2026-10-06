@@ -1,7 +1,7 @@
 const N8N_WEBHOOK = "https://pavansai2013.app.n8n.cloud/webhook/naa-bhavishyathu-ai";
 const professionTelugu = {
   "Police Officer":"పోలీస్ ఆఫీసర్","IAS Officer":"ఐఏఎస్ ఆఫీసర్","Lawyer":"న్యాయవాది",
-  "Sports Teacher":"క్రీడా ఉపాధ్యాయుడు","Athlete":"క్రీడాకారుడు","Doctor":"డాక్టర్",
+  "Sports Teacher":"క్రీడా ఉపాధ్యాయుడు","Athlete":"క్రీడాకారుడు","Cricketer":"క్రికెటర్","Doctor":"డాక్టర్",
   "Teacher":"ఉపాధ్యాయుడు","Scientist":"శాస్త్రవేత్త","Pilot":"పైలట్",
   "Army Officer":"ఆర్మీ ఆఫీసర్","Chef":"షెఫ్","Entrepreneur":"వ్యాపారవేత్త","Engineer":"ఇంజనీర్",
   "Public Representative":"ప్రజా ప్రతినిధి","Navy Officer":"నేవీ ఆఫీసర్","Air Force Officer":"ఎయిర్ ఫోర్స్ ఆఫీసర్",
