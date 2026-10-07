@@ -5,6 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="theme-color" content="#6d28d9">
 <title>Naa Bhavishyathu AI</title>
+<meta name="description" content="Upload your photo, choose your dream profession, create your AI future portrait and get a simple visual career roadmap in Telugu or English.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://naa-bhavishyathu-ai.vercel.app/">
+<meta property="og:title" content="Naa Bhavishyathu AI – మీ ఫోటో • మీ కల • మీ భవిష్యత్తు">
+<meta property="og:description" content="Upload your photo, choose your dream profession, create your AI future portrait and get a simple visual career roadmap in Telugu or English.">
+<meta property="og:image" content="https://naa-bhavishyathu-ai.vercel.app/api/social-preview">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Naa Bhavishyathu AI – మీ ఫోటో • మీ కల • మీ భవిష్యత్తు">
+<meta name="twitter:description" content="AI Future Portrait + Visual Career Roadmap in Telugu / English.">
+<meta name="twitter:image" content="https://naa-bhavishyathu-ai.vercel.app/api/social-preview">
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-NR4S8W0K9M"></script>
 <script>
@@ -40,6 +52,14 @@
 .result-agent{margin:24px auto 8px;max-width:900px;padding:24px;border:1px solid rgba(109,40,217,.18);border-radius:22px;background:linear-gradient(180deg,#fbfaff 0%,#fff 100%);box-shadow:0 10px 28px rgba(55,32,95,.07)}
 .result-agent h2{margin:8px 0}.result-agent .agent-messages{margin-top:14px}
 @media(max-width:700px){.creator-section{grid-template-columns:1fr;text-align:center;padding:22px 18px}.creator-photo img{width:145px;height:145px}.creator-tags{justify-content:center}.result-agent{padding:18px 14px;margin-top:18px}}
+
+.hero-poster{display:block;max-width:1180px;padding:28px 20px 18px;text-align:center}
+.hero-poster-link{display:block;border-radius:28px;overflow:hidden;box-shadow:0 22px 60px rgba(76,29,149,.22);border:1px solid rgba(109,40,217,.18);background:#fff}
+.hero-poster-link img{width:100%;height:auto;display:block;aspect-ratio:1200/630;object-fit:cover}
+.hero-cta-wrap{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px}
+.hero-cta{text-decoration:none;display:inline-flex}
+@media(max-width:700px){.hero-poster{padding:16px 12px 12px}.hero-poster-link{border-radius:18px}.hero-cta-wrap{margin-top:13px}.hero-cta{width:100%;justify-content:center}}
+
 </style>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -54,17 +74,13 @@
   <button id="lang" type="button">తెలుగు / EN</button>
 </header>
 <main>
-<section class="hero">
-  <div class="hero-copy">
-    <span class="pill">AI DREAM CAREER PORTRAIT</span>
-    <h1 id="heroTitle">మీ ఫోటో. మీ కల.<br><em>మీ భవిష్యత్తు.</em></h1>
-    <p id="heroText">మీ ఫోటోను మీ Dream Profession రూపంలో AI portraitగా మార్చండి. మీ పేరుతో చిన్న తెలుగు inspirational message కూడా పొందండి.</p>
+<section class="hero hero-poster">
+  <a class="hero-poster-link" href="#detailsTitle" aria-label="Start Naa Bhavishyathu AI">
+    <img src="/api/social-preview" alt="Naa Bhavishyathu AI Career Journey - Photo to Dream Career to Visual Roadmap">
+  </a>
+  <div class="hero-cta-wrap">
+    <a class="primary hero-cta" href="#detailsTitle">✨ నా భవిష్యత్తును చూడండి</a>
     <a class="hero-site-link" href="https://naa-bhavishyathu-ai.vercel.app/" target="_blank" rel="noopener">🌐 naa-bhavishyathu-ai.vercel.app</a>
-  </div>
-  <div class="upload-card">
-    <button class="primary" id="uploadBtn" type="button" onclick="document.querySelector('#photo').click()">📷 ఫోటో ఎంచుకోండి</button>
-    <input id="photo" type="file" accept="image/*" hidden>
-    <div id="preview"><span class="upload-hint">Clear front-facing photo ఉపయోగించండి</span></div>
   </div>
 </section>
 <section class="builder">
