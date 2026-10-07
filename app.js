@@ -1,7 +1,7 @@
 let paidCredit=false;let successfulGenerations=0;let currentRoadmap=null;
 const jobs=[["👮","Police Officer"],["🏛️","IAS Officer"],["⚖️","Lawyer"],["🏅","Sports Teacher"],["🏃","Athlete"],["🏏","Cricketer"],["🩺","Doctor"],["👩‍🏫","Teacher"],["🔬","Scientist"],["✈️","Pilot"],["🪖","Army Officer"],["👨‍🍳","Chef"],["💼","Entrepreneur"],["💻","Engineer"]];let selected="";const grid=document.querySelector("#jobs");jobs.forEach(([icon,name])=>{const b=document.createElement("button");b.className="job";b.innerHTML="<span>"+icon+"</span><b>"+name+"</b>";b.onclick=()=>{document.querySelectorAll(".job").forEach(x=>x.classList.remove("active"));b.classList.add("active");selected=name;const agentStatus=document.querySelector("#agentStatus");if(agentStatus){agentStatus.textContent="✅ "+name+" ఎంపికైంది — ఇప్పుడు మీ ప్రశ్న టైప్ చేయండి.";agentStatus.classList.add("ready");}document.querySelector("#agentQuestion")?.focus();document.querySelector("#role").textContent=(document.querySelector("#personName")?.value.trim()||"నా కల")+" — "+name};grid.appendChild(b)});document.querySelector("#photo").onchange=e=>{const f=e.target.files[0];if(!f)return;const url=URL.createObjectURL(f);document.querySelector("#preview").innerHTML='<img src="'+url+'" alt="preview">';document.querySelector("#poster").querySelector(".placeholder")?.remove();let img=document.querySelector("#poster img");if(!img){img=document.createElement("img");document.querySelector("#poster").prepend(img)}img.src=url};
 
-function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\\\"":"&quot;","'":"&#39;"}[m]))}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
 function getCurrentStage(){return document.querySelector("#currentStage")?.value||"School Student"}
 function renderRoadmap(rm){
  currentRoadmap=rm||null;
@@ -136,7 +136,7 @@ document.querySelector('#lang')?.addEventListener('click',()=>{
  document.querySelector('#heroTitle').innerHTML=t.heroTitle;document.querySelector('#heroText').textContent=t.heroText;
  document.querySelector('#uploadBtn').textContent=t.upload;document.querySelector('#detailsTitle').textContent=t.details;
  document.querySelector('#nameLabel').textContent=t.name;document.querySelector('#countryLabel').textContent=t.country;
- document.querySelector('#stateLabel').textContent=t.state;document.querySelector('#professionTitle').textContent=t.profession;
+ document.querySelector('#stateLabel').textContent=t.state;const stageLabel=document.querySelector('#stageLabel');if(stageLabel)stageLabel.textContent=uiLang==='te'?'ప్రస్తుతం మీరు':'Current Stage';document.querySelector('#professionTitle').textContent=t.profession;
  document.querySelector('#createTitle').textContent=t.create;document.querySelector('#createText').textContent=t.createText;
  const g=document.querySelector('#generate');if(!g.disabled)g.textContent=t.generate;
  document.querySelector('#resultTitle').textContent=t.result;
