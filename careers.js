@@ -1,4 +1,5 @@
 const extraCareers=[
+  ["🪖","Real Army Soldier"],
   ["🗳️","Public Representative"],["⚓","Navy Officer"],["🛩️","Air Force Officer"],["👩‍⚕️","Nurse"],
   ["💊","Pharmacist"],["🧑‍💻","Software Developer"],["🏗️","Civil Engineer"],["📊","Chartered Accountant"],
   ["🏦","Banker"],["📰","Journalist"],["🌾","Farmer / Agri Entrepreneur"],["🌳","Forest Officer"],
