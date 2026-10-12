@@ -14,6 +14,7 @@ const prompts = {
   "Scientist":"Transform the person into a professional scientist portrait in a modern research laboratory. Preserve identity.",
   "Pilot":"Transform the person into a fictional commercial pilot career portrait in a premium aviation setting, generic uniform with no real airline insignia. Preserve identity.",
   "Army Officer":"Transform the person into a fictional inspirational military career portrait, generic ceremonial uniform with no real unit insignia, no official credential. Preserve identity.",
+  "Real Army Soldier":"Transform the person into a realistic fictional army-soldier career portrait in a safe training or ceremonial setting, wearing a generic military-style uniform with no real unit insignia, no rank badge, no weapon emphasis, no official ID or credential claim. Preserve identity, facial structure, skin tone, hairstyle and age as closely as possible.",
   "Chef":"Transform the person into a premium professional chef portrait in a modern restaurant kitchen. Preserve identity.",
   "Entrepreneur":"Transform the person into a successful modern entrepreneur portrait in an elegant office. Preserve identity.",
   "Engineer":"Transform the person into a professional engineer portrait in a modern technology workspace. Preserve identity.",
