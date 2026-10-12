@@ -3,7 +3,7 @@ const professionTelugu = {
   "Police Officer":"పోలీస్ ఆఫీసర్","IAS Officer":"ఐఏఎస్ ఆఫీసర్","Lawyer":"న్యాయవాది",
   "Sports Teacher":"క్రీడా ఉపాధ్యాయుడు","Athlete":"క్రీడాకారుడు","Cricketer":"క్రికెటర్","Doctor":"డాక్టర్",
   "Teacher":"ఉపాధ్యాయుడు","Scientist":"శాస్త్రవేత్త","Pilot":"పైలట్",
-  "Army Officer":"ఆర్మీ ఆఫీసర్","Chef":"షెఫ్","Entrepreneur":"వ్యాపారవేత్త","Engineer":"ఇంజనీర్",
+  "Army Officer":"ఆర్మీ ఆఫీసర్","Real Army Soldier":"ఆర్మీ సైనికుడు","Chef":"షెఫ్","Entrepreneur":"వ్యాపారవేత్త","Engineer":"ఇంజనీర్",
   "Public Representative":"ప్రజా ప్రతినిధి","Navy Officer":"నేవీ ఆఫీసర్","Air Force Officer":"ఎయిర్ ఫోర్స్ ఆఫీసర్",
   "Nurse":"నర్స్","Pharmacist":"ఫార్మసిస్ట్","Software Developer":"సాఫ్ట్‌వేర్ డెవలపర్",
   "Civil Engineer":"సివిల్ ఇంజనీర్","Chartered Accountant":"చార్టర్డ్ అకౌంటెంట్","Banker":"బ్యాంకర్",
