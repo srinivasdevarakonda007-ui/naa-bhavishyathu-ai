@@ -40,7 +40,15 @@
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
 <script defer src="/_vercel/speed-insights/script.js"></script>
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script></head>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script><style id="corner-career-style">
+.corner-career-card{position:fixed;right:14px;bottom:16px;z-index:30;width:min(330px,calc(100vw - 28px));padding:13px 15px;border-radius:20px;background:linear-gradient(125deg,#fff7ed,#ecfeff 55%,#f3e8ff);box-shadow:0 8px 32px #312e8150;border:2px solid #a78bfa;color:#312e81;text-align:center}
+.corner-career-heading{font-size:1rem;font-weight:900;color:#6d28d9}
+.corner-career-steps{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:5px;font-size:.76rem;margin:9px 0;font-weight:800}
+.corner-career-steps b{color:#f97316}
+.corner-career-card p{margin:0;font-size:.78rem;font-weight:700}
+@media(max-width:650px){.corner-career-card{position:relative;right:auto;bottom:auto;width:auto;margin:12px 14px 20px;padding:12px}}
+</style>
+</head>
 <body>
 <header>
   <div class="brand">✨ Naa Bhavishyathu AI</div>
@@ -60,6 +68,11 @@
   </div>
 </section>
 <aside id="careerCorner" style="position:fixed;right:12px;bottom:16px;z-index:50;width:min(170px,35vw);border-radius:18px;overflow:hidden;box-shadow:0 8px 30px #0003;background:white;border:2px solid #fff"><button type="button" aria-label="Close career guide" onclick="document.getElementById('careerCorner').remove()" style="position:absolute;right:3px;top:3px;border:0;border-radius:50%;background:#fff;padding:4px 8px;cursor:pointer">×</button><img src="/career-guide-corner.png" alt="AI Career Journey Guide" style="display:block;width:100%;height:auto" onerror="this.parentElement.style.display='none'"></aside>
+  <aside class="corner-career-card" aria-label="AI Career Journey">
+    <div class="corner-career-heading">🌈 YOUR DREAM CAREER</div>
+    <div class="corner-career-steps"><span>📷 Photo</span><b>➜</b><span>🎯 Dream</span><b>➜</b><span>🤖 AI Portrait</span><b>➜</b><span>🛣️ Roadmap</span></div>
+    <p>మీ కలకు AI తో అందమైన రూపం • Career guidance</p>
+  </aside>
 <section class="builder">
   <div class="section-head"><span>STEP 1</span><h2 id="detailsTitle">మీ వివరాలు</h2></div>
   <div class="form-row">
