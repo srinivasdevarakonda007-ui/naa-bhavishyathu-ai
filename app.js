@@ -1,6 +1,6 @@
 let paidCredit=false;let successfulGenerations=0;let generatedPortraitSrc="";let latestCareerResult=null;
 const jobs=[
-["🇮🇳","Indian Cricket Team Player"],["🇮🇳","Indian Women's Cricket Player"],["🏏","Cricketer"],["🏏","Athlete"],
+["🇮🇳","Indian Cricket Team Player"],["🇮🇳","Indian Women's Cricket Player"],["🏏","Cricketer"],["🏃","Athlete"],
 ["👮","Police Officer"],["🛡️","IPS Officer"],["🏛️","IAS Officer"],["🪖","Real Army Soldier"],["🎖️","Army Officer"],["⚓","Navy Officer"],["✈️","Air Force Officer"],["⚜️","Scouts and Guides Officer"],
 ["🩺","Doctor"],["🦷","Dentist"],["👩‍⚕️","Nurse"],["💊","Pharmacist"],["🧑‍⚕️","Physiotherapist"],
 ["👩‍🏫","Teacher"],["🔬","Scientist"],["🚀","Astronaut"],["🧑‍✈️","Pilot"],
