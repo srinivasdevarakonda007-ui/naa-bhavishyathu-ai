@@ -44,11 +44,22 @@ function extractAnswer(data){
 
 function buildInstruction({profession,q,language,country,state}){
   const english=language==="en";
-  return english
-   ?`You are the Naa Bhavishyathu AI Career Agent. Selected profession: ${profession}. User question: ${q}. User location context: ${country}${state?", "+state:""}. Answer the exact question directly in clear, simple English. Stay focused on the selected profession. Use short sections or up to 5 concise points only when useful: Education, Skills, Courses, Career Path, Next Step. Do not invent marks, age, qualifications, strengths or achievements. Avoid personality analysis and generic filler. Keep it around 120 words. If eligibility, fees, dates or rules may change, say to verify the latest official notification.`
-   :`నీవు Naa Bhavishyathu AI Career Agent. ఎంపిక చేసిన వృత్తి: ${profession}. యూజర్ అడిగిన అసలు ప్రశ్న: ${q}. ప్రాంతం: ${country}${state?", "+state:""}. ఆ ప్రశ్నకే నేరుగా, సహజమైన, సులభమైన తెలుగులో సమాధానం ఇవ్వాలి. ఎంపిక చేసిన వృత్తి గురించే ఉండాలి. అవసరమైనప్పుడు మాత్రమే చదువు, Skills, Courses, Career Path, Next Step అనే చిన్న విభాగాలు లేదా గరిష్టంగా 5 చిన్న points వాడాలి. యూజర్ చెప్పని marks, age, qualifications, strengths లేదా achievements ఊహించకూడదు. అనవసర personality analysis లేదా generic filler వద్దు. English technical course/exam names అవసరమైనప్పుడు మాత్రమే వాడాలి. సుమారు 120 పదాల్లో ఉంచాలి. eligibility, fees, dates లేదా rules మారే అంశమైతే latest official notification verify చేయాలని చివరలో చెప్పాలి.`;
-}
+  const context=`Selected profession: ${profession}. User's exact question: ${q}. Location context: ${country}${state?", "+state:""}.`;
+  const structure=`Return exactly these three sections, in this order, using these exact English headings so the website can format the result:
+DIRECT ANSWER:
+Write one direct, accurate, easy-to-understand answer to the user's exact question in the requested language.
 
+STEP-BY-STEP PLAN:
+Write 4 to 6 numbered steps, one step per line, in this exact format:
+1. Short action title — practical explanation of what the student should do.
+Each step must be relevant, concrete, logically ordered, and understandable to a school student. Do not repeat the same advice.
+
+IMPORTANT NOTE:
+Give one brief useful caution. If eligibility, official rules, dates, or fees can change, tell the user to verify the latest official notification. Never invent facts, marks, age limits, qualifications, fees, deadlines, or guaranteed outcomes. Do not assume personal details that the user did not provide. Stay focused on the selected profession and question. Avoid generic filler, personality analysis, Markdown tables, and extra headings. Keep the complete response concise (about 180–250 words).`;
+  return english
+    ?`You are the Naa Bhavishyathu AI Career Agent. Answer in clear, simple English. ${context}\n\n${structure}`
+    :`నీవు Naa Bhavishyathu AI Career Agent. సమాధానం మరియు ప్రతి step వివరణ సహజమైన, సులభంగా అర్థమయ్యే తెలుగులో ఇవ్వాలి; అవసరమైన course/exam పేర్లు Englishలో ఉంచవచ్చు. ${context}\n\n${structure}\n\nThe section headings must remain exactly: DIRECT ANSWER:, STEP-BY-STEP PLAN:, IMPORTANT NOTE:. The actual answer and step descriptions must be in Telugu.`;
+}
 async function askOpenAI(instruction){
   if(!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY_MISSING");
   const controller=new AbortController();
@@ -63,7 +74,7 @@ async function askOpenAI(instruction){
       body:JSON.stringify({
         model:"gpt-4.1-mini",
         input:[{role:"user",content:instruction}],
-        max_output_tokens:450
+        max_output_tokens:650
       }),
       signal:controller.signal
     });
