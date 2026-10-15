@@ -1,5 +1,5 @@
-let paidCredit=false;let successfulGenerations=0;
-const jobs=[["👮","Police Officer"],["🏛️","IAS Officer"],["⚖️","Lawyer"],["🏅","Sports Teacher"],["🏃","Athlete"],["🏏","Cricketer"],["🩺","Doctor"],["👩‍🏫","Teacher"],["🔬","Scientist"],["✈️","Pilot"],["🪖","Real Army Soldier"],["⚜️","Scouts and Guides Officer"],["👨‍🍳","Chef"],["💼","Entrepreneur"],["💻","Engineer"]];let selected="";const grid=document.querySelector("#jobs");jobs.forEach(([icon,name])=>{const b=document.createElement("button");b.className="job";b.innerHTML="<span>"+icon+"</span><b>"+name+"</b>";b.onclick=()=>{document.querySelectorAll(".job").forEach(x=>x.classList.remove("active"));b.classList.add("active");selected=name;const agentStatus=document.querySelector("#agentStatus");if(agentStatus){agentStatus.textContent="✅ "+name+" ఎంపికైంది — ఇప్పుడు మీ ప్రశ్న టైప్ చేయండి.";agentStatus.classList.add("ready");}document.querySelector("#agentQuestion")?.focus();document.querySelector("#role").textContent=(document.querySelector("#personName")?.value.trim()||"నా కల")+" — "+name};grid.appendChild(b)});document.querySelector("#photo").onchange=e=>{const f=e.target.files[0];if(!f)return;const url=URL.createObjectURL(f);document.querySelector("#preview").innerHTML='<img src="'+url+'" alt="preview">';document.querySelector("#poster").querySelector(".placeholder")?.remove();let img=document.querySelector("#poster img");if(!img){img=document.createElement("img");document.querySelector("#poster").prepend(img)}img.src=url};
+let paidCredit=false;let successfulGenerations=0;let generatedPortraitSrc="";let latestCareerResult=null;
+const jobs=[["👮","Police Officer"],["🏛️","IAS Officer"],["⚖️","Lawyer"],["🏅","Sports Teacher"],["🏃","Athlete"],["🏏","Cricketer"],["🩺","Doctor"],["👩‍🏫","Teacher"],["🔬","Scientist"],["✈️","Pilot"],["🪖","Real Army Soldier"],["⚜️","Scouts and Guides Officer"],["👨‍🍳","Chef"],["💼","Entrepreneur"],["💻","Engineer"]];let selected="";const grid=document.querySelector("#jobs");jobs.forEach(([icon,name])=>{const b=document.createElement("button");b.className="job";b.innerHTML="<span>"+icon+"</span><b>"+name+"</b>";b.onclick=()=>{document.querySelectorAll(".job").forEach(x=>x.classList.remove("active"));b.classList.add("active");selected=name;const agentStatus=document.querySelector("#agentStatus");if(agentStatus){agentStatus.textContent="✅ "+name+" ఎంపికైంది — ఇప్పుడు మీ ప్రశ్న టైప్ చేయండి.";agentStatus.classList.add("ready");}document.querySelector("#agentQuestion")?.focus();document.querySelector("#role").textContent=(document.querySelector("#personName")?.value.trim()||"నా కల")+" — "+name};grid.appendChild(b)});document.querySelector("#photo").onchange=e=>{const f=e.target.files[0];if(!f)return;generatedPortraitSrc="";const url=URL.createObjectURL(f);document.querySelector("#preview").innerHTML='<img src="'+url+'" alt="preview">';document.querySelector("#poster").querySelector(".placeholder")?.remove();let img=document.querySelector("#poster img");if(!img){img=document.createElement("img");document.querySelector("#poster").prepend(img)}img.src=url;if(latestCareerResult)renderCareerResult(latestCareerResult.question,latestCareerResult.rawAnswer);};
 document.querySelector("#generate").onclick=async()=>{
  if(successfulGenerations>=1&&!paidCredit){document.querySelector("#paymentBox").hidden=false;document.querySelector("#paymentBox").scrollIntoView({behavior:"smooth"});return alert("మొదటి AI Portrait ఉచితం. మరో portrait కోసం ₹20 secure payment చేయండి.");}
  const file=document.querySelector("#photo").files[0];
@@ -34,6 +34,8 @@ document.querySelector("#generate").onclick=async()=>{
      let img=document.querySelector("#poster img");
      if(!img){img=document.createElement("img");document.querySelector("#poster").prepend(img)}
      img.src=imageResult.value.image;
+     generatedPortraitSrc=imageResult.value.image;
+     if(latestCareerResult)renderCareerResult(latestCareerResult.question,latestCareerResult.rawAnswer);
      successfulGenerations += 1;
      paidCredit = false;
      document.querySelector("#paymentBox").hidden = false;
@@ -130,6 +132,109 @@ function addAgentBubble(text,isUser=false){
  const box=document.querySelector("#agentMessages"); if(!box)return;
  const d=document.createElement("div");d.className="agent-bubble"+(isUser?" user":"");d.textContent=text;box.appendChild(d);box.scrollTop=box.scrollHeight;
 }
+function parseCareerAnswer(raw){
+ const text=String(raw||"").replace(/\r/g,"").trim();
+ const answerMatch=text.match(/DIRECT ANSWER\s*[:：]\s*([\s\S]*?)(?=\n\s*STEP-BY-STEP PLAN\s*[:：]|\n\s*IMPORTANT NOTE\s*[:：]|$)/i);
+ const stepsMatch=text.match(/STEP-BY-STEP PLAN\s*[:：]\s*([\s\S]*?)(?=\n\s*IMPORTANT NOTE\s*[:：]|$)/i);
+ const noteMatch=text.match(/IMPORTANT NOTE\s*[:：]\s*([\s\S]*?)$/i);
+ let answer=(answerMatch?.[1]||"").trim();
+ let stepText=(stepsMatch?.[1]||"").trim();
+ let steps=[];
+ for(const line of stepText.split(/\n+/)){
+  const m=line.match(/^\s*(?:step\s*)?(\d{1,2})[.)\-:]\s*(.+)$/i);
+  if(!m)continue;
+  const body=m[2].trim();
+  const split=body.match(/^(.{2,70}?)[—–:]\s*(.+)$/);
+  steps.push({title:split?split[1].trim():(uiLang==="en"?"Step ":"దశ ")+m[1],description:split?split[2].trim():body});
+ }
+ if(!answer){
+  answer=text.replace(/STEP-BY-STEP PLAN\s*[:：]?[\s\S]*$/i,"").replace(/IMPORTANT NOTE\s*[:：]?[\s\S]*$/i,"").trim();
+  if(!answer)answer=text;
+ }
+ return {answer,steps,note:(noteMatch?.[1]||"").trim()};
+}
+function renderCareerResult(question,rawAnswer){
+ const card=document.querySelector("#careerResult");if(!card)return;
+ const parsed=parseCareerAnswer(rawAnswer);
+ latestCareerResult={question:String(question||""),rawAnswer:String(rawAnswer||""),answer:parsed.answer,steps:parsed.steps,note:parsed.note,profession:selected,language:uiLang,photo:generatedPortraitSrc};
+ const heading=document.querySelector("#careerResultHeading");
+ const q=document.querySelector("#careerResultQuestion");
+ const answer=document.querySelector("#careerResultAnswer");
+ const photo=document.querySelector("#careerResultPhoto");
+ const photoHint=document.querySelector("#careerResultPhotoHint");
+ const note=document.querySelector("#careerResultNote");
+ const stepsWrap=document.querySelector("#careerResultSteps");
+ if(heading)heading.textContent=selected||"Career Guidance";
+ if(q)q.textContent=question;
+ if(answer)answer.textContent=parsed.answer;
+ if(photo){
+  if(generatedPortraitSrc.startsWith("data:image/")){photo.src=generatedPortraitSrc;photo.hidden=false;if(photoHint)photoHint.hidden=true;}
+  else{photo.removeAttribute("src");photo.hidden=true;if(photoHint)photoHint.hidden=false;}
+ }
+ if(note){note.textContent=parsed.note;note.hidden=!parsed.note;}
+ if(stepsWrap){
+  stepsWrap.replaceChildren();
+  parsed.steps.forEach((step,index)=>{
+   const article=document.createElement("article");article.className="career-step-card step-color-"+((index%5)+1);
+   const number=document.createElement("span");number.className="career-step-number";number.textContent=String(index+1).padStart(2,"0");
+   const content=document.createElement("div");content.className="career-step-content";
+   const title=document.createElement("h4");title.textContent=step.title;
+   const desc=document.createElement("p");desc.textContent=step.description;
+   content.append(title,desc);article.append(number,content);stepsWrap.appendChild(article);
+  });
+  const empty=document.querySelector("#careerStepsEmpty");
+  if(empty)empty.hidden=parsed.steps.length>0;
+ }
+ card.hidden=false;
+}
+function escapeResultHtml(value){
+ return String(value??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+function buildCompleteResultHtml(autoPrint=false){
+ if(!latestCareerResult)throw new Error(uiLang==="en"?"Ask the Career Agent first to create a result.":"ముందుగా Career Agentని అడిగి ఫలితాన్ని తయారు చేయండి.");
+ const r=latestCareerResult;
+ const safePhoto=/^data:image\/(?:png|jpeg|jpg|webp);base64,/i.test(r.photo||"")?r.photo:"";
+ const photoHtml=safePhoto?'<img class="portrait" src="'+safePhoto+'" alt="AI career portrait">':'<p class="no-photo">AI portrait ఇంకా తయారు కాలేదు. ఫోటో లేకుండా career guide సేవ్ చేయబడింది.</p>';
+ const stepsHtml=(r.steps||[]).map((step,i)=>'<article class="step step-'+(i%5+1)+'"><span>'+(i+1)+'</span><div><h3>'+escapeResultHtml(step.title)+'</h3><p>'+escapeResultHtml(step.description)+'</p></div></article>').join("");
+ const noteHtml=r.note?'<aside><strong>Important note</strong><p>'+escapeResultHtml(r.note)+'</p></aside>':"";
+ return '<!doctype html><html lang="'+(r.language==="en"?"en":"te")+'"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Naa Bhavishyathu AI - Career Guide</title><style>*{box-sizing:border-box}body{font-family:Arial,"Noto Sans Telugu",sans-serif;margin:0;background:#f5f3ff;color:#24183b;line-height:1.65}.page{max-width:900px;margin:24px auto;background:white;padding:28px;border-radius:24px;box-shadow:0 10px 35px #312e811a}.hero{padding:22px;border-radius:18px;background:linear-gradient(125deg,#dbeafe,#f3e8ff,#ccfbf1)}.brand{font-size:13px;font-weight:800;color:#6d28d9}.hero h1{margin:8px 0;color:#312e81;font-size:30px}.meta{font-size:14px;color:#51456b}.portrait{display:block;width:min(100%,440px);max-height:580px;object-fit:contain;margin:22px auto;border-radius:18px;border:1px solid #ddd6fe}.answer,.step{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;margin:12px 0}.answer{border-left:6px solid #7c3aed}.step{display:flex;gap:14px;align-items:flex-start}.step>span{display:grid;place-items:center;min-width:38px;height:38px;border-radius:12px;background:#ede9fe;color:#5b21b6;font-weight:900}.step-2{background:#eff6ff}.step-3{background:#ecfdf5}.step-4{background:#fff7ed}.step-5{background:#fdf2f8}h2{color:#4c1d95;margin:24px 0 8px}h3{margin:0 0 5px;font-size:17px}p{margin:4px 0;white-space:pre-wrap}aside{padding:14px;border-radius:12px;background:#fff7ed;border:1px solid #fed7aa}.no-photo{padding:20px;background:#f8fafc;border-radius:12px;text-align:center;color:#64748b}.foot{margin-top:24px;text-align:center;color:#6b7280;font-size:12px}@media print{body{background:#fff}.page{margin:0 auto;box-shadow:none;border-radius:0;padding:12mm;max-width:none}h2{break-after:avoid}.step{break-inside:avoid}.portrait{max-height:245mm}}@media(max-width:600px){.page{margin:0;padding:16px;border-radius:0}.hero h1{font-size:25px}}</style></head><body><main class="page"><header class="hero"><div class="brand">✨ Naa Bhavishyathu AI</div><h1>'+escapeResultHtml(r.profession||selected||"Career Guidance")+'</h1><p class="meta"><strong>Question:</strong> '+escapeResultHtml(r.question)+'</p></header>'+photoHtml+'<h2>AI Answer / సమాధానం</h2><section class="answer"><p>'+escapeResultHtml(r.answer)+'</p></section><h2>Step-by-Step Plan / దశలవారీ ప్రణాళిక</h2>'+ (stepsHtml||'<p>ఈ సమాధానంలో ప్రత్యేక numbered steps అందుబాటులో లేవు.</p>')+noteHtml+'<footer class="foot">Created with Naa Bhavishyathu AI • Educational guidance; verify changing official requirements.</footer></main>'+(autoPrint?'<script>window.addEventListener("load",function(){setTimeout(function(){window.print()},400)});<\/script>':"")+'</body></html>';
+}
+function downloadData(data,filename,type){
+ const blob=new Blob([data],{type});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+async function downloadRawPortrait(){
+ try{
+  if(!generatedPortraitSrc)throw new Error(uiLang==="en"?"Generate an AI portrait first.":"ముందుగా AI Portrait తయారు చేయండి.");
+  const response=await fetch(generatedPortraitSrc);if(!response.ok)throw new Error("Image download failed.");
+  const blob=await response.blob();const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;
+  const slug=(selected||"career").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"career";
+  a.download="naa-bhavishyathu-"+slug+"-portrait.png";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+ }catch(e){alert(e.message||"Image download failed.");}
+}
+function downloadCompleteResult(){
+ try{
+  if(!latestCareerResult)throw new Error(uiLang==="en"?"Ask the Career Agent first.":"ముందుగా Career Agentని అడగండి.");
+  const slug=(latestCareerResult.profession||"career").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"career";
+  downloadData(buildCompleteResultHtml(false),"naa-bhavishyathu-"+slug+"-complete-result.html","text/html;charset=utf-8");
+ }catch(e){alert(e.message||"Could not download result.");}
+}
+function downloadGuideText(){
+ try{
+  if(!latestCareerResult)throw new Error(uiLang==="en"?"Ask the Career Agent first.":"ముందుగా Career Agentని అడగండి.");
+  const r=latestCareerResult;const content=["Naa Bhavishyathu AI - Career Guide","Profession: "+(r.profession||""),"Question: "+r.question,"","ANSWER",r.answer,"","STEP-BY-STEP PLAN",...(r.steps||[]).map((s,i)=>(i+1)+". "+s.title+" - "+s.description),r.note?"":"",r.note?"IMPORTANT NOTE: "+r.note:""].filter(Boolean).join("\n");
+  downloadData(content,"naa-bhavishyathu-career-guide.txt","text/plain;charset=utf-8");
+ }catch(e){alert(e.message||"Could not download guide.");}
+}
+function saveCompleteResultPdf(){
+ try{
+  const w=window.open("","_blank");if(!w)throw new Error(uiLang==="en"?"Allow pop-ups to print or save as PDF.":"PDF సేవ్ చేయడానికి browserలో pop-ups అనుమతించండి.");
+  w.document.open();w.document.write(buildCompleteResultHtml(true));w.document.close();
+ }catch(e){alert(e.message||"Could not open the print view.");}
+}
+document.querySelector("#downloadCareerPhoto")?.addEventListener("click",downloadRawPortrait);
+document.querySelector("#downloadCompleteResult")?.addEventListener("click",downloadCompleteResult);
+document.querySelector("#downloadGuideOnly")?.addEventListener("click",downloadGuideText);
+document.querySelector("#saveResultPdf")?.addEventListener("click",saveCompleteResultPdf);
 document.querySelector("#askAgent")?.addEventListener("click",async()=>{
  const input=document.querySelector("#agentQuestion"),btn=document.querySelector("#askAgent");
  const question=input.value.trim(),name=document.querySelector("#personName").value.trim();
@@ -139,7 +244,8 @@ document.querySelector("#askAgent")?.addEventListener("click",async()=>{
  try{
   const r=await fetch("/api/career-agent",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,profession:selected,question,country:document.querySelector("#country").value,state:document.querySelector("#state").value,language:uiLang})});
   const d=await r.json();if(!r.ok)throw new Error(d.error||"Career Agent unavailable");
-  addAgentBubble(d.answer);
+  renderCareerResult(question,d.answer);
+  const status=document.querySelector("#agentStatus");if(status){status.textContent=uiLang==="en"?"✅ Your career plan is ready below.":"✅ మీ Career Plan క్రింద సిద్ధంగా ఉంది.";status.classList.add("ready");}
  }catch(e){addAgentBubble(uiLang==="en"?"Career Agent error: "+(e.message||"Please try again."):"Career Agent error: "+(e.message||"మళ్లీ ప్రయత్నించండి."));}
  finally{btn.disabled=false;btn.textContent=uiLang==="en"?"🤖 Ask":"🤖 అడగండి";}
 });
