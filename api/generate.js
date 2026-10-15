@@ -8,7 +8,7 @@ const prompts = {
   "Lawyer":"Transform the person into a premium professional lawyer portrait in formal black advocate attire, elegant legal-office background. Preserve identity and natural facial features.",
   "Sports Teacher":"Transform the person into a confident professional physical education teacher portrait on a modern school sports ground, premium sportswear, whistle, tasteful athletic atmosphere. Preserve identity.",
   "Athlete":"Transform the person into an elite inspirational athlete portrait in a stadium, premium sports kit, dynamic but realistic. Preserve identity.",
-  "Cricketer":"Transform the person into a professional inspirational cricketer portrait in a modern cricket stadium, wearing premium generic cricket whites or match kit, holding a cricket bat in a natural pose. No real team logos, national emblems, sponsor marks or official credential claims. Preserve identity, facial structure, skin tone, hairstyle and age as closely as possible.",
+  "Cricketer":"Transform the person into an inspirational Indian cricket player portrait in a modern cricket stadium, wearing a premium India-style blue national cricket jersey with simple white INDIA lettering and subtle tricolour accents, holding a cricket bat in a natural pose. Do not copy the exact BCCI crest, official team insignia or sponsor logos. Preserve the uploaded person’s identity, facial structure, skin tone, hairstyle and age as closely as possible.",
   "Doctor":"Transform the person into a professional doctor career portrait with clean white coat and modern clinic background, no ID card or credential claims. Preserve identity.",
   "Teacher":"Transform the person into a warm professional teacher portrait in a modern classroom. Preserve identity.",
   "Scientist":"Transform the person into a professional scientist portrait in a modern research laboratory. Preserve identity.",
@@ -19,6 +19,23 @@ const prompts = {
   "Chef":"Transform the person into a premium professional chef portrait in a modern restaurant kitchen. Preserve identity.",
   "Entrepreneur":"Transform the person into a successful modern entrepreneur portrait in an elegant office. Preserve identity.",
   "Engineer":"Transform the person into a professional engineer portrait in a modern technology workspace. Preserve identity.",
+  "Indian Cricket Team Player":"Transform the person into a fictional aspiring Indian men's national cricket-team-style player in a premium royal-blue jersey with simple white INDIA lettering and subtle saffron-white-green accents, in a major cricket stadium under bright lights, holding a bat confidently. Do not copy the exact BCCI crest, official team insignia or sponsor logos. Preserve the uploaded person's identity, facial structure, skin tone, hairstyle and age as closely as possible.",
+  "Indian Women's Cricket Player":"Transform the person into a fictional aspiring Indian women's national cricket-team-style player in a premium royal-blue jersey with simple white INDIA lettering and subtle saffron-white-green accents, in a major cricket stadium under bright lights, holding a bat confidently. Do not copy the exact BCCI crest, official team insignia or sponsor logos. Preserve the uploaded person's identity, facial structure, skin tone, hairstyle and age as closely as possible.",
+  "IPS Officer":"Transform the person into a dignified fictional Indian police-service leadership career portrait in a neat generic khaki uniform, professional posture and modern police-office setting. No real department insignia, rank badges, ID card or credential claims. Preserve identity and natural facial features.",
+  "AI Engineer":"Transform the person into a professional AI engineer portrait in a premium modern technology lab with tasteful AI, robotics and computer-screen elements, realistic and not futuristic fantasy. Preserve identity and natural facial features.",
+  "Cybersecurity Expert":"Transform the person into a professional cybersecurity expert portrait in a modern secure technology operations workspace with subtle code screens, no real company logos or readable personal data. Preserve identity.",
+  "Architect":"Transform the person into a professional architect portrait in a modern design studio with building models and architectural plans. Preserve identity and natural facial features.",
+  "Dentist":"Transform the person into a professional dentist portrait in a clean modern dental clinic, wearing appropriate clinical attire, no ID or credential claims. Preserve identity.",
+  "Veterinarian":"Transform the person into a compassionate veterinarian portrait in a clean veterinary clinic with a friendly dog or cat, safe and professional. Preserve identity.",
+  "Astronaut":"Transform the person into an inspirational fictional astronaut career portrait in a clean astronaut suit with a generic space exploration backdrop. No real agency logos, mission patches or official credential claims. Preserve identity.",
+  "Judge":"Transform the person into a dignified fictional judge career portrait in formal judicial attire in a tasteful courtroom setting, no official seal, ID or credential claims. Preserve identity.",
+  "Physiotherapist":"Transform the person into a professional physiotherapist portrait in a modern rehabilitation clinic or sports recovery setting, with safe exercise equipment. Preserve identity.",
+  "Badminton Player":"Transform the person into an elite Indian badminton player portrait on an indoor badminton court, wearing premium blue athletic jersey with subtle tricolour accents and holding a racket, dynamic but realistic. No real sponsor or official team logos. Preserve identity.",
+  "Footballer":"Transform the person into an inspirational football player portrait on a professional football field, wearing a premium India-inspired blue jersey with subtle tricolour accents, holding a football or standing in an athletic pose. No official team insignia or sponsor logos. Preserve identity.",
+  "Hockey Player":"Transform the person into an inspirational Indian hockey player portrait on a professional hockey turf, wearing a premium blue jersey with subtle tricolour accents and holding a hockey stick. No official team insignia or sponsor logos. Preserve identity.",
+  "Kabaddi Player":"Transform the person into an elite Indian kabaddi player portrait on an indoor kabaddi court, wearing a premium athletic kit with subtle tricolour accents, powerful but safe sporting pose. Preserve identity.",
+  "Wrestler":"Transform the person into an inspirational Indian wrestling athlete portrait on a clean competition mat, wearing appropriate wrestling sportswear, athletic and respectful, no real team logos. Preserve identity.",
+  "Railway Officer":"Transform the person into a professional Indian railway-career portrait in a clean railway station or operations setting, wearing generic formal professional attire, no official railway insignia, ID card or credential claims. Preserve identity.",
   "Public Representative":"Transform the person into a neutral, fictional public-leadership portrait in a civic community setting, wearing dignified formal Indian attire. No political party logo, flag, election symbol, campaign slogan, ballot material or endorsement claim. Preserve identity and natural facial features.",
   "Navy Officer":"Transform the person into a fictional inspirational naval-officer career portrait in a clean maritime setting, generic ceremonial naval-style uniform with no real insignia, unit marks, official badge or credential. Preserve identity.",
   "Air Force Officer":"Transform the person into a fictional inspirational air-force career portrait near a modern aviation setting, generic formal uniform with no real insignia, squadron marks, official badge or credential. Preserve identity.",
@@ -62,7 +79,11 @@ function recordSuccess(sessionId){
 function buildImageForm(image,profession,country,state){
   const form=new FormData();
   form.append("model","gpt-image-2");
-  form.append("prompt",prompts[profession]+" Location context: "+country+(country==="India"?", "+state:"")+". Photorealistic premium studio quality, natural skin texture, realistic proportions, vertical portrait composition. Do not add text to the image.");
+  const cricketJerseyRoles=["Cricketer","Indian Cricket Team Player","Indian Women's Cricket Player"];
+  const textRule=cricketJerseyRoles.includes(profession)
+    ? "Do not add captions, watermark or extra text outside the jersey; allow only the simple word INDIA on the jersey."
+    : "Do not add text to the image.";
+  form.append("prompt",prompts[profession]+" Location context: "+country+(country==="India"?", "+state:"")+". Photorealistic premium studio quality, natural skin texture, realistic proportions, vertical portrait composition. "+textRule);
   form.append("size","1024x1536");
   form.append("quality","medium");
   form.append("image",new Blob([image.data],{type:image.type}),image.filename);
