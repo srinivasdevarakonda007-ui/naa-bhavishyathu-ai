@@ -1,15 +1,17 @@
 const N8N_WEBHOOK = "https://pavansai2013.app.n8n.cloud/webhook/naa-bhavishyathu-ai";
 const professionTelugu = {
-  "Police Officer":"పోలీస్ ఆఫీసర్","IAS Officer":"ఐఏఎస్ ఆఫీసర్","Lawyer":"న్యాయవాది",
-  "Sports Teacher":"క్రీడా ఉపాధ్యాయుడు","Athlete":"క్రీడాకారుడు","Cricketer":"క్రికెటర్","Doctor":"డాక్టర్",
-  "Teacher":"ఉపాధ్యాయుడు","Scientist":"శాస్త్రవేత్త","Pilot":"పైలట్",
-  "Army Officer":"ఆర్మీ ఆఫీసర్","Real Army Soldier":"ఆర్మీ సైనికుడు","Chef":"షెఫ్","Entrepreneur":"వ్యాపారవేత్త","Engineer":"ఇంజనీర్",
-  "Public Representative":"ప్రజా ప్రతినిధి","Navy Officer":"నేవీ ఆఫీసర్","Air Force Officer":"ఎయిర్ ఫోర్స్ ఆఫీసర్",
-  "Nurse":"నర్స్","Pharmacist":"ఫార్మసిస్ట్","Software Developer":"సాఫ్ట్‌వేర్ డెవలపర్",
-  "Civil Engineer":"సివిల్ ఇంజనీర్","Chartered Accountant":"చార్టర్డ్ అకౌంటెంట్","Banker":"బ్యాంకర్",
-  "Journalist":"జర్నలిస్ట్","Farmer / Agri Entrepreneur":"రైతు / అగ్రి ఎంట్రప్రెన్యూర్","Forest Officer":"ఫారెస్ట్ ఆఫీసర్",
-  "Fire & Rescue Officer":"ఫైర్ అండ్ రెస్క్యూ ఆఫీసర్","Social Worker":"సామాజిక సేవకుడు","Artist / Designer":"ఆర్టిస్ట్ / డిజైనర్",
-  "Content Creator":"కంటెంట్ క్రియేటర్"
+  "Indian Cricket Team Player":"భారత క్రికెట్ జట్టు ఆటగాడు",
+  "Indian Women's Cricket Player":"భారత మహిళల క్రికెట్ జట్టు క్రీడాకారిణి",
+  "Cricketer":"క్రికెటర్","Athlete":"క్రీడాకారుడు","Sports Teacher":"క్రీడా ఉపాధ్యాయుడు",
+  "Badminton Player":"బ్యాడ్మింటన్ క్రీడాకారుడు","Footballer":"ఫుట్‌బాల్ క్రీడాకారుడు","Hockey Player":"హాకీ క్రీడాకారుడు","Kabaddi Player":"కబడ్డీ క్రీడాకారుడు","Wrestler":"రెజ్లర్",
+  "Police Officer":"పోలీస్ ఆఫీసర్","IPS Officer":"ఐపీఎస్ ఆఫీసర్","IAS Officer":"ఐఏఎస్ ఆఫీసర్",
+  "Real Army Soldier":"ఆర్మీ సైనికుడు","Army Officer":"ఆర్మీ ఆఫీసర్","Navy Officer":"నేవీ ఆఫీసర్","Air Force Officer":"ఎయిర్ ఫోర్స్ ఆఫీసర్","Scouts and Guides Officer":"స్కౌట్స్ అండ్ గైడ్స్ ఆఫీసర్",
+  "Doctor":"డాక్టర్","Dentist":"దంత వైద్యుడు","Nurse":"నర్స్","Pharmacist":"ఫార్మసిస్ట్","Physiotherapist":"ఫిజియోథెరపిస్ట్",
+  "Teacher":"ఉపాధ్యాయుడు","Scientist":"శాస్త్రవేత్త","Astronaut":"వ్యోమగామి","Pilot":"పైలట్",
+  "Engineer":"ఇంజనీర్","Civil Engineer":"సివిల్ ఇంజనీర్","Architect":"ఆర్కిటెక్ట్","Software Developer":"సాఫ్ట్‌వేర్ డెవలపర్","AI Engineer":"ఏఐ ఇంజనీర్","Cybersecurity Expert":"సైబర్ సెక్యూరిటీ నిపుణుడు",
+  "Lawyer":"న్యాయవాది","Judge":"న్యాయమూర్తి","Chartered Accountant":"చార్టర్డ్ అకౌంటెంట్","Banker":"బ్యాంకర్","Entrepreneur":"వ్యాపారవేత్త","Chef":"షెఫ్",
+  "Farmer / Agri Entrepreneur":"రైతు / అగ్రి ఎంట్రప్రెన్యూర్","Forest Officer":"ఫారెస్ట్ ఆఫీసర్","Fire & Rescue Officer":"ఫైర్ అండ్ రెస్క్యూ ఆఫీసర్","Railway Officer":"రైల్వే ఆఫీసర్",
+  "Journalist":"జర్నలిస్ట్","Content Creator":"కంటెంట్ క్రియేటర్","Artist / Designer":"ఆర్టిస్ట్ / డిజైనర్","Social Worker":"సామాజిక సేవకుడు","Public Representative":"ప్రజా ప్రతినిధి"
 };
 
 export default async function handler(req, res) {
