@@ -241,6 +241,97 @@ function saveCompleteResultPdf(){
   w.document.open();w.document.write(buildCompleteResultHtml(true));w.document.close();
  }catch(e){alert(e.message||"Could not open the print view.");}
 }
+
+let html2pdfLoaderPromise=null;
+function loadHtml2Pdf(){
+ if(window.html2pdf)return Promise.resolve();
+ if(!html2pdfLoaderPromise){
+  html2pdfLoaderPromise=new Promise((resolve,reject)=>{
+   const script=document.createElement("script");
+   script.src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+   script.onload=()=>resolve();
+   script.onerror=()=>{html2pdfLoaderPromise=null;reject(new Error("HD PDF library load కాలేదు. Internet connection చూసి మళ్లీ ప్రయత్నించండి."));};
+   document.head.appendChild(script);
+  });
+ }
+ return html2pdfLoaderPromise;
+}
+function resultPdfFilename(){
+ const r=latestCareerResult||{};
+ const name=(document.querySelector("#personName")?.value||"").trim();
+ const base=(name+"-"+(r.profession||selected||"career")).toLowerCase().replace(/[^a-z0-9\u0C00-\u0C7F]+/g,"-").replace(/^-|-$/g,"")||"career";
+ return "naa-bhavishyathu-"+base+"-HD.pdf";
+}
+async function createHighQualityResultPdf(){
+ if(!latestCareerResult)throw new Error(uiLang==="en"?"Ask the Career Agent first to create your answer.":"ముందుగా Career Agentని అడిగి సమాధానం పొందండి.");
+ if(!generatedPortraitSrc)throw new Error(uiLang==="en"?"Generate your AI Future Portrait first, then ask the Career Agent.":"ముందుగా AI Future Portrait తయారు చేసి, తర్వాత Career Agent సమాధానం పొందండి.");
+ if(!latestCareerResult.photo)latestCareerResult.photo=generatedPortraitSrc;
+ if(!/^data:image\/(?:png|jpeg|jpg|webp);base64,/i.test(latestCareerResult.photo||"")){
+  try{
+   const response=await fetch(latestCareerResult.photo||generatedPortraitSrc);
+   if(response.ok){
+    const blob=await response.blob();
+    latestCareerResult.photo=await new Promise((resolve,reject)=>{
+     const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(new Error("Portrait image could not be prepared."));reader.readAsDataURL(blob);
+    });
+   }
+  }catch(e){console.warn("PDF portrait conversion:",e);}
+ }
+ await loadHtml2Pdf();
+ const frame=document.createElement("iframe");
+ frame.setAttribute("aria-hidden","true");
+ frame.style.cssText="position:fixed;left:-12000px;top:0;width:1000px;height:1200px;border:0;opacity:0;pointer-events:none";
+ document.body.appendChild(frame);
+ try{
+  await new Promise((resolve,reject)=>{frame.onload=resolve;frame.onerror=reject;frame.srcdoc=buildCompleteResultHtml(false);});
+  const doc=frame.contentDocument;
+  if(doc.fonts?.ready)await doc.fonts.ready.catch(()=>{});
+  await Promise.all(Array.from(doc.images).map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.onload=resolve;img.onerror=resolve;})));
+  const page=doc.querySelector(".page");
+  if(!page)throw new Error("PDF content could not be prepared.");
+  const pdf=await window.html2pdf().set({
+   margin:[8,8,10,8],
+   filename:resultPdfFilename(),
+   image:{type:"jpeg",quality:0.98},
+   html2canvas:{scale:2.5,useCORS:true,allowTaint:false,backgroundColor:"#ffffff",logging:false,windowWidth:1000,scrollX:0,scrollY:0},
+   jsPDF:{unit:"mm",format:"a4",orientation:"portrait",compress:true},
+   pagebreak:{mode:["css","legacy"],avoid:[".step","aside",".portrait"]}
+  }).from(page).toPdf().get("pdf");
+  return pdf.output("blob");
+ }finally{
+  frame.remove();
+ }
+}
+async function downloadHighQualityResultPdf(){
+ const btn=document.querySelector("#downloadHdResultPdf");
+ const old=btn?.textContent;
+ try{
+  if(btn){btn.disabled=true;btn.textContent="⏳ HD PDF తయారవుతోంది…";}
+  const blob=await createHighQualityResultPdf();
+  const url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download=resultPdfFilename();document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+ }catch(e){alert(e.message||"HD PDF తయారు చేయలేకపోయాం.");}
+ finally{if(btn){btn.disabled=false;btn.textContent=old||"⬇️ HD PDF Download";}}
+}
+async function shareHighQualityResultPdf(){
+ const btn=document.querySelector("#shareResultPdf");
+ const old=btn?.textContent;
+ try{
+  if(btn){btn.disabled=true;btn.textContent="⏳ PDF సిద్ధమవుతోంది…";}
+  const blob=await createHighQualityResultPdf();
+  const file=new File([blob],resultPdfFilename(),{type:"application/pdf"});
+  if(navigator.share&&navigator.canShare?.({files:[file]})){
+   await navigator.share({title:"Naa Bhavishyathu AI — Career Report",text:"AI Future Portrait + Career Guidance PDF",files:[file]});
+  }else{
+   const url=URL.createObjectURL(blob),a=document.createElement("a");
+   a.href=url;a.download=resultPdfFilename();document.body.appendChild(a);a.click();a.remove();
+   setTimeout(()=>URL.revokeObjectURL(url),5000);
+   alert("HD PDF download అయింది. ఇప్పుడు Downloads నుంచి WhatsApp, Telegram, Gmail లేదా మీకు నచ్చిన appలో share చేయండి.");
+  }
+ }catch(e){if(e.name!=="AbortError")alert(e.message||"PDF share చేయలేకపోయాం.");}
+ finally{if(btn){btn.disabled=false;btn.textContent=old||"📤 Share PDF";}}
+}
 document.querySelector("#downloadCareerPhoto")?.addEventListener("click",downloadRawPortrait);
 document.querySelector("#downloadCompleteResult")?.addEventListener("click",downloadCompleteResult);
 document.querySelector("#downloadGuideOnly")?.addEventListener("click",downloadGuideText);
