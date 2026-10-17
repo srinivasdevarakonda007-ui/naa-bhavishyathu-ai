@@ -336,6 +336,8 @@ document.querySelector("#downloadCareerPhoto")?.addEventListener("click",downloa
 document.querySelector("#downloadCompleteResult")?.addEventListener("click",downloadCompleteResult);
 document.querySelector("#downloadGuideOnly")?.addEventListener("click",downloadGuideText);
 document.querySelector("#saveResultPdf")?.addEventListener("click",saveCompleteResultPdf);
+document.querySelector("#downloadHdResultPdf")?.addEventListener("click",downloadHighQualityResultPdf);
+document.querySelector("#shareResultPdf")?.addEventListener("click",shareHighQualityResultPdf);
 document.querySelector("#askAgent")?.addEventListener("click",async()=>{
  const input=document.querySelector("#agentQuestion"),btn=document.querySelector("#askAgent");
  const question=input.value.trim(),name=document.querySelector("#personName").value.trim();
