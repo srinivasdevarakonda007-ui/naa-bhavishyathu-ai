@@ -1,4 +1,4 @@
-let paidCredit=false;let successfulGenerations=0;let generatedPortraitSrc="";let latestCareerResult=null;
+let paidCredit=false;let successfulGenerations=0;let generatedPortraitSrc="";let lastGeneratedPortraitSrc="";let latestCareerResult=null;
 const jobs=[
 ["🇮🇳","Indian Cricket Team Player"],["🇮🇳","Indian Women's Cricket Player"],["🏏","Cricketer"],["🏃","Athlete"],
 ["👮","Police Officer"],["🛡️","IPS Officer"],["🏛️","IAS Officer"],["🪖","Real Army Soldier"],["🎖️","Army Officer"],["⚓","Navy Officer"],["✈️","Air Force Officer"],["⚜️","Scouts and Guides Officer"],
@@ -45,6 +45,7 @@ document.querySelector("#generate").onclick=async()=>{
      if(!img){img=document.createElement("img");document.querySelector("#poster").prepend(img)}
      img.src=imageResult.value.image;
      generatedPortraitSrc=imageResult.value.image;
+     lastGeneratedPortraitSrc=imageResult.value.image;
      if(latestCareerResult)renderCareerResult(latestCareerResult.question,latestCareerResult.rawAnswer);
      successfulGenerations += 1;
      paidCredit = false;
@@ -166,7 +167,7 @@ function parseCareerAnswer(raw){
 function renderCareerResult(question,rawAnswer){
  const card=document.querySelector("#careerResult");if(!card)return;
  const parsed=parseCareerAnswer(rawAnswer);
- latestCareerResult={question:String(question||""),rawAnswer:String(rawAnswer||""),answer:parsed.answer,steps:parsed.steps,note:parsed.note,profession:selected,language:uiLang,photo:generatedPortraitSrc};
+ latestCareerResult={question:String(question||""),rawAnswer:String(rawAnswer||""),answer:parsed.answer,steps:parsed.steps,note:parsed.note,profession:selected,language:uiLang,photo:lastGeneratedPortraitSrc||generatedPortraitSrc};
  const heading=document.querySelector("#careerResultHeading");
  const q=document.querySelector("#careerResultQuestion");
  const answer=document.querySelector("#careerResultAnswer");
@@ -203,7 +204,8 @@ function escapeResultHtml(value){
 function buildCompleteResultHtml(autoPrint=false){
  if(!latestCareerResult)throw new Error(uiLang==="en"?"Ask the Career Agent first to create a result.":"ముందుగా Career Agentని అడిగి ఫలితాన్ని తయారు చేయండి.");
  const r=latestCareerResult;
- const safePhoto=/^data:image\/(?:png|jpeg|jpg|webp);base64,/i.test(r.photo||"")?r.photo:"";
+ const portraitSrc=r.photo||lastGeneratedPortraitSrc||generatedPortraitSrc;
+ const safePhoto=/^data:image\/(?:png|jpeg|jpg|webp);base64,/i.test(portraitSrc||"")?portraitSrc:"";
  const photoHtml=safePhoto?'<img class="portrait" src="'+safePhoto+'" alt="AI career portrait">':'<p class="no-photo">AI portrait ఇంకా తయారు కాలేదు. ఫోటో లేకుండా career guide సేవ్ చేయబడింది.</p>';
  const stepsHtml=(r.steps||[]).map((step,i)=>'<article class="step step-'+(i%5+1)+'"><span>'+(i+1)+'</span><div><h3>'+escapeResultHtml(step.title)+'</h3><p>'+escapeResultHtml(step.description)+'</p></div></article>').join("");
  const noteHtml=r.note?'<aside><strong>Important note</strong><p>'+escapeResultHtml(r.note)+'</p></aside>':"";
@@ -264,8 +266,9 @@ function resultPdfFilename(){
 }
 async function createHighQualityResultPdf(){
  if(!latestCareerResult)throw new Error(uiLang==="en"?"Ask the Career Agent first to create your answer.":"ముందుగా Career Agentని అడిగి సమాధానం పొందండి.");
- if(!generatedPortraitSrc)throw new Error(uiLang==="en"?"Generate your AI Future Portrait first, then ask the Career Agent.":"ముందుగా AI Future Portrait తయారు చేసి, తర్వాత Career Agent సమాధానం పొందండి.");
- if(!latestCareerResult.photo)latestCareerResult.photo=generatedPortraitSrc;
+ const portraitSrc=lastGeneratedPortraitSrc||generatedPortraitSrc||latestCareerResult.photo;
+ if(!portraitSrc)throw new Error(uiLang==="en"?"Generate your AI Future Portrait first, then ask the Career Agent.":"ముందుగా AI Future Portrait తయారు చేసి, తర్వాత Career Agent సమాధానం పొందండి.");
+ latestCareerResult.photo=portraitSrc;
  if(!/^data:image\/(?:png|jpeg|jpg|webp);base64,/i.test(latestCareerResult.photo||"")){
   try{
    const response=await fetch(latestCareerResult.photo||generatedPortraitSrc);
@@ -286,7 +289,12 @@ async function createHighQualityResultPdf(){
   await new Promise((resolve,reject)=>{frame.onload=resolve;frame.onerror=reject;frame.srcdoc=buildCompleteResultHtml(false);});
   const doc=frame.contentDocument;
   if(doc.fonts?.ready)await doc.fonts.ready.catch(()=>{});
-  await Promise.all(Array.from(doc.images).map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.onload=resolve;img.onerror=resolve;})));
+  await Promise.all(Array.from(doc.images).map(img=>{
+   if(typeof img.decode==="function")return img.decode().catch(()=>{});
+   return img.complete?Promise.resolve():new Promise(resolve=>{img.onload=resolve;img.onerror=resolve;});
+  }));
+  const portrait=doc.querySelector(".portrait");
+  if(portrait&&(!portrait.complete||portrait.naturalWidth===0))throw new Error(uiLang==="en"?"The generated portrait could not be loaded into the PDF. Please generate the portrait again and retry.":"తయారైన ఫోటో PDFలో లోడ్ కాలేదు. Portraitను మళ్లీ తయారు చేసి ప్రయత్నించండి.");
   const page=doc.querySelector(".page");
   if(!page)throw new Error("PDF content could not be prepared.");
   const pdf=await window.html2pdf().set({
