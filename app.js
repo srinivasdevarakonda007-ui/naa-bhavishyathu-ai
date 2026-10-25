@@ -179,7 +179,8 @@ function renderCareerResult(question,rawAnswer){
  if(q)q.textContent=question;
  if(answer)answer.textContent=parsed.answer;
  if(photo){
-  if(generatedPortraitSrc.startsWith("data:image/")){photo.src=generatedPortraitSrc;photo.hidden=false;if(photoHint)photoHint.hidden=true;}
+  const availablePortrait=getAvailablePortraitSrc();
+  if(availablePortrait){photo.src=availablePortrait;photo.hidden=false;if(photoHint)photoHint.hidden=true;}
   else{photo.removeAttribute("src");photo.hidden=true;if(photoHint)photoHint.hidden=false;}
  }
  if(note){note.textContent=parsed.note;note.hidden=!parsed.note;}
@@ -198,13 +199,23 @@ function renderCareerResult(question,rawAnswer){
  }
  card.hidden=false;
 }
+function getAvailablePortraitSrc(){
+ const candidates=[
+  lastGeneratedPortraitSrc,
+  generatedPortraitSrc,
+  latestCareerResult?.photo,
+  document.querySelector("#poster img")?.src,
+  document.querySelector("#careerResultPhoto")?.src
+ ];
+ return candidates.find(src=>typeof src==="string" && /^data:image\/(?:png|jpeg|jpg|webp);base64,/i.test(src))||"";
+}
 function escapeResultHtml(value){
  return String(value??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 }
 function buildCompleteResultHtml(autoPrint=false){
  if(!latestCareerResult)throw new Error(uiLang==="en"?"Ask the Career Agent first to create a result.":"ముందుగా Career Agentని అడిగి ఫలితాన్ని తయారు చేయండి.");
  const r=latestCareerResult;
- const portraitSrc=r.photo||lastGeneratedPortraitSrc||generatedPortraitSrc;
+ const portraitSrc=getAvailablePortraitSrc()||r.photo||lastGeneratedPortraitSrc||generatedPortraitSrc;
  const safePhoto=/^data:image\/(?:png|jpeg|jpg|webp);base64,/i.test(portraitSrc||"")?portraitSrc:"";
  const photoHtml=safePhoto?'<img class="portrait" src="'+safePhoto+'" alt="AI career portrait">':'<p class="no-photo">AI portrait ఇంకా తయారు కాలేదు. ఫోటో లేకుండా career guide సేవ్ చేయబడింది.</p>';
  const stepsHtml=(r.steps||[]).map((step,i)=>'<article class="step step-'+(i%5+1)+'"><span>'+(i+1)+'</span><div><h3>'+escapeResultHtml(step.title)+'</h3><p>'+escapeResultHtml(step.description)+'</p></div></article>').join("");
@@ -266,7 +277,7 @@ function resultPdfFilename(){
 }
 async function createHighQualityResultPdf(){
  if(!latestCareerResult)throw new Error(uiLang==="en"?"Ask the Career Agent first to create your answer.":"ముందుగా Career Agentని అడిగి సమాధానం పొందండి.");
- const portraitSrc=lastGeneratedPortraitSrc||generatedPortraitSrc||latestCareerResult.photo;
+ const portraitSrc=getAvailablePortraitSrc()||latestCareerResult.photo;
  if(!portraitSrc)throw new Error(uiLang==="en"?"Generate your AI Future Portrait first, then ask the Career Agent.":"ముందుగా AI Future Portrait తయారు చేసి, తర్వాత Career Agent సమాధానం పొందండి.");
  latestCareerResult.photo=portraitSrc;
  if(!/^data:image\/(?:png|jpeg|jpg|webp);base64,/i.test(latestCareerResult.photo||"")){
