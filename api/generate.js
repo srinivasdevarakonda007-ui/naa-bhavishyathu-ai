@@ -86,6 +86,7 @@ function buildImageForm(image,profession,country,state){
   form.append("prompt",prompts[profession]+" Location context: "+country+(country==="India"?", "+state:"")+". Photorealistic premium studio quality, natural skin texture, realistic proportions, vertical portrait composition. "+textRule);
   form.append("size","1024x1536");
   form.append("quality","medium");
+  form.append("output_format","png");
   form.append("image",new Blob([image.data],{type:image.type}),image.filename);
   return form;
 }
@@ -164,7 +165,14 @@ export default async function handler(req,res){
       return res.status(r?.status||502).json({error:message,code:apiErrorCode(r?.status||502,message),...publicEntitlement(state)});
     }
     const b64=data?.data?.[0]?.b64_json;
-    if(!b64) return res.status(502).json({error:"No image returned.",code:"NO_IMAGE",...publicEntitlement(state)});
+    if(!b64 || typeof b64!=="string" || !/^[A-Za-z0-9+/]+={0,2}$/.test(b64)){
+      return res.status(502).json({error:"AI returned an invalid image. No portrait credit was used; please try again later.",code:"INVALID_IMAGE",...publicEntitlement(state)});
+    }
+    const imageBytes=Buffer.from(b64,"base64");
+    const isPng=imageBytes.length>8 && imageBytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]));
+    if(!isPng){
+      return res.status(502).json({error:"AI image format was invalid. No portrait credit was used; please try again later.",code:"INVALID_IMAGE",...publicEntitlement(state)});
+    }
 
     if(useFree) state.freeUsed=true;
     else state.credits=Math.max(0,state.credits-1);
