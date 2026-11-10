@@ -32,7 +32,7 @@ document.querySelector("#generate").onclick=async()=>{
    fd.append("image",file);fd.append("profession",selected);
    fd.append("country",document.querySelector("#country").value);
    fd.append("state",document.querySelector("#state").value);
-   const imageRequest=fetch("/api/generate",{method:"POST",body:fd}).then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.error||"Portrait generation failed");return d;});
+   const imageRequest=fetch("/api/generate",{method:"POST",body:fd}).then(async r=>{const d=await r.json();if(!r.ok){const err=new Error(d.error||"Portrait generation failed");err.code=d.code||"UNKNOWN";err.status=r.status;throw err;}return d;});
 
    const [storyResult,imageResult]=await Promise.allSettled([storyRequest,imageRequest]);
    if(storyResult.status==="fulfilled"){
@@ -52,10 +52,11 @@ document.querySelector("#generate").onclick=async()=>{
      document.querySelector("#paymentBox").hidden = false;
    }else{
      const rawMsg=String(imageResult.reason?.message||"");
+     const errCode=String(imageResult.reason?.code||"UNKNOWN");
      const safeMsg=/safety|rejected|policy/i.test(rawMsg)
-       ?"ఈ ఫోటోతో AI portrait తయారు చేయలేకపోయింది. AI image safety check వల్ల ఈ ఫోటో process కాలేదు. మరో clear front-facing photoతో ప్రయత్నించండి."
-       :"Portrait తయారీలో తాత్కాలిక సమస్య వచ్చింది. మరోసారి ప్రయత్నించండి.";
-     alert(safeMsg);
+       ?"ఈ ఫోటోతో AI portrait తయారు చేయలేకపోయింది. మరో clear front-facing photoతో ప్రయత్నించండి."
+       :"AI Portrait తయారు కాలేదు. మీ credit తగ్గించలేదు.";
+     alert(safeMsg+"\\n\\nError code: "+errCode+"\\nDetails: "+rawMsg);
    }
    document.querySelector("#actions").hidden=false;
    document.querySelector("#poster").scrollIntoView({behavior:"smooth"});
